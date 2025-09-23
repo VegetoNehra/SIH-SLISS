@@ -116,26 +116,6 @@ app.get("/api/library", async (req, res) => {
 });
 
 // ============================
-// 📌 Notice Routes
-// ============================
-app.get("/api/notices", async (req, res) => {
-  const { rows } = await pool.query("SELECT * FROM notices ORDER BY date DESC");
-  res.json(rows);
-});
-
-app.post("/api/notices", async (req, res) => {
-  const { title, category, date, content } = req.body;
-  if (!title || !category || !date || !content) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-  await pool.query(
-    "INSERT INTO notices (title, category, date, content) VALUES ($1,$2,$3,$4)",
-    [title, category, date, content]
-  );
-  res.json({ message: "Notice added successfully" });
-});
-
-// ============================
 // 🧠 Complaint Routes
 // ============================
 app.post("/api/support", async (req, res) => {
@@ -216,6 +196,98 @@ app.post("/api/rooms/add", async (req, res) => {
     [room_id, hostel, type, seats]
   );
   res.json({ message: "Room added successfully" });
+});
+
+// ============================
+// Bulletin (lowercase columns)
+// ============================
+
+// ✅ GET all notices
+app.get("/api/bulletin", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, title, category, date, content 
+       FROM bulletin 
+       ORDER BY date DESC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching notices:", err);
+    res.status(500).json({ error: "Failed to fetch notices" });
+  }
+});
+
+// ✅ POST a new notice
+app.post("/api/bulletin", async (req, res) => {
+  try {
+    const { title, category, date, content } = req.body;
+    const result = await pool.query(
+      `INSERT INTO bulletin (title, category, date, content) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id, title, category, date, content`,
+      [title, category, date, content]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Error inserting notice:", err);
+    res.status(500).json({ error: "Failed to add notice" });
+  }
+});
+
+// ✅ UPDATE a notice
+app.put("/api/bulletin/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, date, content } = req.body;
+
+    const result = await pool.query(
+      `UPDATE bulletin 
+       SET title=$1, category=$2, date=$3, content=$4 
+       WHERE id=$5 
+       RETURNING id, title, category, date, content`,
+      [title, category, date, content, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Notice not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating notice:", err);
+    res.status(500).json({ error: "Failed to update notice" });
+  }
+});
+
+// ✅ DELETE a notice
+app.delete("/api/bulletin/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `DELETE FROM bulletin WHERE id=$1 RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Notice not found" });
+    }
+
+    res.json({ success: true, deletedId: id });
+  } catch (err) {
+    console.error("Error deleting notice:", err);
+    res.status(500).json({ error: "Failed to delete notice" });
+  }
+});
+
+// ✅ DELETE all notices
+app.delete("/api/bulletin", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM bulletin");
+    res.json({ success: true, message: "All notices cleared" });
+  } catch (err) {
+    console.error("Error clearing notices:", err);
+    res.status(500).json({ error: "Failed to clear notices" });
+  }
 });
 
 // ============================
