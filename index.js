@@ -53,6 +53,43 @@ function isAbusive(text) {
 }
 
 
+import fs from "fs"; // make sure this is at the top with other imports
+
+// ============================
+// Static Serving
+// ============================
+app.use("/student", express.static(path.join(__dirname, "public", "student")));
+app.use("/admin", express.static(path.join(__dirname, "public", "admin")));
+app.use("/assets", express.static(path.join(__dirname, "public", "assets")));
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
+
+// Default → student homepage
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "student", "index.html"));
+});
+
+// Student pages fallback (so /submit.html, /about.html etc. work)
+app.get("/:page.html", (req, res, next) => {
+  const page = req.params.page;
+  const studentPath = path.join(__dirname, "public", "student", `${page}.html`);
+  if (fs.existsSync(studentPath)) {
+    return res.sendFile(studentPath);
+  }
+  next();
+});
+
+// Admin pages fallback (so /admin/index.html etc. work)
+app.get("/admin/:page.html", (req, res, next) => {
+  const page = req.params.page;
+  const adminPath = path.join(__dirname, "public", "admin", `${page}.html`);
+  if (fs.existsSync(adminPath)) {
+    return res.sendFile(adminPath);
+  }
+  next();
+});
+
+
+
 
 // ============================
 // 📌 Library Book Routes (per user)
@@ -574,3 +611,4 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+
