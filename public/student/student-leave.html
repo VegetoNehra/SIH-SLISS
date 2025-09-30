@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Leave Application</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b0c2a] text-gray-200 min-h-screen">
+  <!-- 🔹 Navbar -->
+  <header class="navbar p-4 flex items-center justify-between bg-[#131432]">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" class="h-10" alt="logo">
+      <span class="text-xl font-semibold text-purple-300">SLISS</span>
+    </div>
+  </header>
+
+  <!-- 🔹 Page Content -->
+  <main class="flex flex-col items-center p-6 space-y-8">
+    <!-- Leave Form -->
+    <div class="bg-[#1f213f] w-full max-w-lg rounded-2xl p-8 shadow-lg">
+      <h2 class="text-2xl font-bold text-center text-purple-400 mb-6">Student Leave Application</h2>
+
+      <div id="msgBox" class="hidden p-3 rounded mb-4 text-center"></div>
+
+      <form id="leaveForm" class="space-y-4">
+        <div>
+          <label class="block font-medium">Full Name</label>
+          <input type="text" name="name" required
+            class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500"/>
+        </div>
+
+        <div>
+          <label class="block font-medium">Leave Type</label>
+          <select name="leave_type" required
+            class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500">
+            <option value="">-- Select --</option>
+            <option value="Sick">Sick</option>
+            <option value="Personal">Personal</option>
+            <option value="Emergency">Emergency</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2">
+          <div class="w-1/2">
+            <label class="block font-medium">From Date</label>
+            <input type="date" name="from_date" required
+              class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500"/>
+          </div>
+          <div class="w-1/2">
+            <label class="block font-medium">To Date</label>
+            <input type="date" name="to_date" required
+              class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium">Reason</label>
+          <textarea name="reason" rows="3" required
+            class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-purple-500"></textarea>
+        </div>
+
+        <button type="submit"
+          class="w-full py-2 rounded bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition">
+          Submit Application
+        </button>
+      </form>
+    </div>
+
+    <!-- Leave History -->
+    <div class="bg-[#1f213f] w-full max-w-3xl rounded-2xl p-8 shadow-lg">
+      <h2 class="text-2xl font-bold text-center text-purple-400 mb-6">My Leave History</h2>
+      <div id="leaveHistory" class="space-y-4"></div>
+    </div>
+  </main>
+
+  <!-- 🔹 JS Script -->
+  <script>
+    const userid = localStorage.getItem("userid");
+    if (!userid) {
+      alert("Please login first.");
+      window.location.href = "index.html";
+    }
+
+    const msgBox = document.getElementById("msgBox");
+    const leaveHistory = document.getElementById("leaveHistory");
+
+    // Format date for display
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      return new Date(dateStr).toLocaleDateString("en-IN", {
+        day: "numeric", month: "short", year: "numeric"
+      });
+    }
+
+    // Submit new leave
+    document.getElementById("leaveForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const fd = new FormData(this);
+      const body = Object.fromEntries(fd.entries());
+      body.userid = userid;
+
+      try {
+        const res = await fetch("/api/leaves", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          msgBox.textContent = "✅ Leave submitted successfully!";
+          msgBox.style.background = "#065f46";
+          msgBox.classList.remove("hidden");
+          this.reset();
+          fetchLeaveHistory(); // refresh list
+        } else {
+          const err = await res.json();
+          msgBox.textContent = "⚠️ " + (err.message || "Submission failed");
+          msgBox.style.background = "#7f1d1d";
+          msgBox.classList.remove("hidden");
+        }
+      } catch (error) {
+        console.error(error);
+        msgBox.textContent = "⚠️ Network error";
+        msgBox.style.background = "#7f1d1d";
+        msgBox.classList.remove("hidden");
+      }
+    });
+
+    // Fetch and render leave history
+    async function fetchLeaveHistory() {
+      leaveHistory.innerHTML = "<p class='text-gray-400 text-center'>Loading...</p>";
+      try {
+        const res = await fetch(`/api/leaves/${userid}`);
+        if (!res.ok) throw new Error("Failed to fetch history");
+        const leaves = await res.json();
+
+        if (leaves.length === 0) {
+          leaveHistory.innerHTML = "<p class='text-gray-400 text-center'>No leave records found.</p>";
+          return;
+        }
+
+        leaveHistory.innerHTML = "";
+        leaves.forEach(l => {
+          const statusClasses = {
+            pending: "bg-yellow-500/20 text-yellow-400",
+            approved: "bg-green-500/20 text-green-400",
+            declined: "bg-red-500/20 text-red-400"
+          };
+
+          const div = document.createElement("div");
+          div.className = "p-4 bg-[#2a2c4a] rounded-lg shadow space-y-1";
+          div.innerHTML = `
+            <p><strong>Type:</strong> ${l.leave_type}</p>
+            <p><strong>Dates:</strong> ${formatDate(l.from_date)} → ${formatDate(l.to_date)}</p>
+            <p><strong>Reason:</strong> ${l.reason}</p>
+            <p><strong>Status:</strong> 
+              <span class="px-2 py-1 rounded ${statusClasses[l.status] || 'text-gray-300'}">
+                ${l.status}
+              </span>
+            </p>
+          `;
+          leaveHistory.appendChild(div);
+        });
+      } catch (err) {
+        console.error(err);
+        leaveHistory.innerHTML = "<p class='text-red-400 text-center'>⚠️ Failed to load leave history.</p>";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchLeaveHistory);
+  </script>
+</body>
+</html>

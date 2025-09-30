@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Result - AKTU</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+        font-family: "Inter", sans-serif;
+        background-color: #0b0c2a;
+        color: #e5e7eb;
+      }
+      /* ✅ Logo style */
+.logo {
+  height: 50px; /* fixed height */
+  width: auto;  /* keep natural aspect ratio */
+  display: block;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+
+.logo:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+      
+/* ================= NAVBAR ================= */
+      :root {
+        --nav-h: 70px;
+        --accent1: #8b5cf6; /* violet */
+        --accent2: #d946ef; /* pink */
+      }
+
+      .navbar {
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background: rgba(3, 8, 23, 0.6);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-text {
+        font-weight: 600;
+        color: #fff;
+        margin-left: 6px;
+        letter-spacing: 1px;
+        font-size: 20px;
+        opacity: 0.95;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-links a {
+        display: inline-block;
+        padding: 8px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        background: linear-gradient(90deg, var(--accent1), var(--accent2));
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+        transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+        letter-spacing: 1px;
+      }
+
+      .nav-links a:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+        filter: brightness(1.05);
+      }
+
+      .nav-links a.active {
+        filter: brightness(1.2);
+        box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+      }
+      footer {
+        background-color: #161735;
+      }
+      /* Result container wrapper */
+.result-container {
+  max-width: 800px;   /* reduce width */
+  margin: 30px auto;  /* center horizontally */
+  padding: 20px;
+  background: #161735; 
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+    /* Custom style for the subtle gradient on text/elements if needed, similar to the SLISS logo */
+    .text-sliss-gradient {
+      background: linear-gradient to right, #8A2BE2, #4169E1; /* Purple to blue gradient */
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+<body>
+  <!-- 🔹 Header -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- 🔹 Main Content -->
+  <main class="result-container">
+    <h1 class="text-3xl font-bold text-gray-100 mb-2">Student Result</h1>
+    <p class="text-sm text-gray-400 mb-4">AKTU Results</p>
+
+    <div class="bg-[#3b3b5c] p-4 flex items-center gap-3 rounded-md mb-6">
+      <label for="result-select" class="font-medium text-gray-100">Select Result:</label>
+      <select
+        id="result-select"
+        class="p-2 rounded bg-gray-700 text-gray-100 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+      >
+        <optgroup label="University Results" class="bg-gray-700 text-gray-100">
+          <option value="sem1">Semester 1</option>
+          <option value="sem2">Semester 2</option>
+          <option value="sem3">Semester 3</option>
+          <option value="sem4">Semester 4</option>
+          <option value="sem5">Semester 5</option>
+          <option value="sem6">Semester 6</option>
+          <option value="sem7">Semester 7</option>
+          <option value="sem8">Semester 8</option>
+        </optgroup>
+        <optgroup label="School Results" class="bg-gray-700 text-gray-100">
+          <option value="class10">Class 10</option>
+          <option value="class12">Class 12</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <section id="result-area" class="p-4 bg-[#24243e] rounded-md">
+      <!-- Student marks will load here -->
+    </section>
+  </main>
+  <script>
+    const subjects = {
+      sem1: [ { code: 'BAS102', name: 'Engineering Chemistry', marks: 88, maxMarks: 100 }, { code: 'BAS103', name: 'Engineering Mathematics - I', marks: 91, maxMarks: 100 }, { code: 'BCS101', name: 'Programming for Problem Solving', marks: 76, maxMarks: 100 }, { code: 'BAS104', name: 'Environment & Ecology', marks: 85, maxMarks: 100 }, { code: 'BEC101', name: 'Fundamentals of Electronics Engineering', marks: 72, maxMarks: 100 } ],
+      sem2: [ { code: 'BAS201', name: 'Engineering Physics', marks: 89, maxMarks: 100 }, { code: 'BAS203', name: 'Engineering Mathematics - II', marks: 81, maxMarks: 100 }, { code: 'BEE201', name: 'Fundamentals of Electrical Engineering', marks: 84, maxMarks: 100 }, { code: 'BME201', name: 'Fundamentals of Mechanical Engineering', marks: 78, maxMarks: 100 }, { code: 'BAS205', name: 'Soft Skills', marks: 95, maxMarks: 100 } ],
+      sem3: [ { code: 'BCS301', name: 'Data Structures', marks: 92, maxMarks: 100 }, { code: 'BCS302', name: 'Computer Organization & Architecture', marks: 85, maxMarks: 100 }, { code: 'BCS303', name: 'Discrete Structures & Theory of Logic', marks: 79, maxMarks: 100 }, { code: 'BCC301/302', name: 'Python Programming (elective)', marks: 94, maxMarks: 100 }, { code: 'BOE3 / BAS303', name: 'Mathematics', marks: 80, maxMarks: 100 }, { code: 'BVE301 / BAS301', name: 'Universal Human Values & Professional Ethics', marks: 88, maxMarks: 100 } ],
+      sem4: [ { code: 'BCS401', name: 'Operating Systems', marks: 0, maxMarks: 100 }, { code: 'BCS402', name: 'Software Engineering', marks: 0, maxMarks: 100 }, { code: 'BCS403', name: 'Theory of Automata & Formal Languages', marks: 0, maxMarks: 100 }, { code: 'BAS403', name: 'Mathematics-III', marks: 0, maxMarks: 100 }, { code: 'BVE401', name: 'Technical Communication', marks: 0, maxMarks: 100 } ],
+      sem5: [ { code: 'BCS501', name: 'Database Management System', marks: 0, maxMarks: 100 }, { code: 'BCS502', name: 'Compiler Design', marks: 0, maxMarks: 100 }, { code: 'BCS503', name: 'Design and Analysis of Algorithm', marks: 0, maxMarks: 100 }, { code: 'BCS504', name: 'Web Technology', marks: 0, maxMarks: 100 }, { code: 'BCS-E1', name: 'Departmental Elective - I', marks: 0, maxMarks: 100 } ],
+      sem6: [ { code: 'BCS601', name: 'Computer Networks', marks: 0, maxMarks: 100 }, { code: 'BCS602', name: 'Artificial Intelligence', marks: 0, maxMarks: 100 }, { code: 'BCS603', name: 'Software Testing', marks: 0, maxMarks: 100 }, { code: 'BCS-E2', name: 'Departmental Elective - II', marks: 0, maxMarks: 100 }, { code: 'BOE-1', name: 'Open Elective - I', marks: 0, maxMarks: 100 } ],
+      sem7: [ { code: 'BCS701', name: 'Cryptography & Network Security', marks: 0, maxMarks: 100 }, { code: 'BCS702', name: 'Machine Learning', marks: 0, maxMarks: 100 }, { code: 'BCS-E3', name: 'Departmental Elective - III', marks: 0, maxMarks: 100 }, { code: 'BCS-E4', name: 'Departmental Elective - IV', marks: 0, maxMarks: 100 }, { code: 'BOE-2', name: 'Open Elective - II', marks: 0, maxMarks: 100 } ],
+      sem8: [ { code: 'BCS-E5', name: 'Departmental Elective - V', marks: 0, maxMarks: 100 }, { code: 'BCS-E6', name: 'Departmental Elective - VI', marks: 0, maxMarks: 100 }, { code: 'BCS801', name: 'Project', marks: 0, maxMarks: 100 } ],
+      class10: [ { code: '101', name: 'English', marks: 95, maxMarks: 100 }, { code: '102', name: 'Mathematics', marks: 98, maxMarks: 100 }, { code: '103', name: 'Science', marks: 92, maxMarks: 100 }, { code: '104', name: 'Social Studies', marks: 96, maxMarks: 100 }, { code: '105', name: 'Hindi', marks: 88, maxMarks: 100 } ],
+      class12: [ { code: '201', name: 'English Core', marks: 94, maxMarks: 100 }, { code: '202', name: 'Physics', marks: 91, maxMarks: 100 }, { code: '203', name: 'Chemistry', marks: 87, maxMarks: 100 }, { code: '204', name: 'Mathematics', marks: 96, maxMarks: 100 }, { code: '205', name: 'Computer Science', marks: 99, maxMarks: 100 } ],
+    };
+
+    const sel = document.getElementById('result-select');
+    const mainArea = document.getElementById('result-area');
+
+    function render() {
+      mainArea.innerHTML = '';
+      const selectedKey = sel.value;
+      const subjectsArray = subjects[selectedKey] || [];
+
+      // 1. Create and render the subjects list
+      const subjectList = document.createElement('ul');
+      subjectList.className = 'space-y-3';
+      
+      subjectsArray.forEach(subject => {
+        const li = document.createElement('li');
+        // Changed background, text color for dark theme consistency
+        li.className = 'bg-[#2b2b4d] p-4 rounded shadow flex justify-between items-center text-gray-100';
+        
+        let resultDisplayHtml;
+        if (selectedKey.startsWith('sem')) {
+          const semesterNumber = parseInt(selectedKey.replace('sem', ''), 10);
+          resultDisplayHtml = (semesterNumber <= 3) 
+            ? `<span class="text-lg font-bold text-green-400">${subject.marks} / ${subject.maxMarks}</span>` // Lighter green for dark background
+            : `<span class="text-sm font-medium text-gray-500">Result not declared yet</span>`;
+        } else {
+          resultDisplayHtml = `<span class="text-lg font-bold text-green-400">${subject.marks} / ${subject.maxMarks}</span>`; // Lighter green for dark background
+        }
+
+        li.innerHTML = `
+          <div>
+            <p class="font-semibold text-gray-100">${subject.name}</p>
+            <p class="text-xs text-gray-400">Code: ${subject.code}</p>
+          </div>
+          ${resultDisplayHtml}
+        `;
+        subjectList.appendChild(li);
+      });
+      mainArea.appendChild(subjectList);
+
+      // 2. Create and render the final result download section
+      const finalResultSection = document.createElement('div');
+      finalResultSection.className = 'mt-6 pt-6 border-t border-[#3b3b5c]'; // Darker border
+      
+      if (selectedKey.startsWith('sem')) {
+        const semesterNumber = parseInt(selectedKey.replace('sem', ''), 10);
+        const isDeclared = semesterNumber <= 3;
+        const downloadButtonHtml = isDeclared
+          ? `<a href="#" onclick="alert('Downloading marksheet for Semester ${semesterNumber}...')" class="bg-indigo-700 text-white font-bold py-2 px-4 rounded hover:bg-indigo-600 transition-colors text-sm">Download</a>` // Darker indigo
+          : `<button disabled class="bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded cursor-not-allowed text-sm">Unavailable</button>`; // Darker gray for disabled
+          // The title "University Result" should also align with the theme
+        finalResultSection.innerHTML = `
+          <h2 class="text-xl font-semibold text-gray-100 mb-3">University Result</h2>
+          <div class="bg-[#2b2b4d] p-4 rounded shadow flex justify-between items-center text-gray-100">
+            <p class="font-medium text-gray-300">Official Semester ${semesterNumber} Marksheet</p>
+            ${downloadButtonHtml}
+          </div>
+        `;
+      } else { 
+        const className = selectedKey.replace('class', '');
+        finalResultSection.innerHTML = `
+          <h2 class="text-xl font-semibold text-gray-100 mb-3">Board Result</h2>
+          <div class="bg-[#2b2b4d] p-4 rounded shadow flex justify-between items-center text-gray-100">
+            <p class="font-medium text-gray-300">Official Class ${className} Marksheet</p>
+            <a href="#" onclick="alert('Downloading marksheet for Class ${className}...')" class="bg-indigo-700 text-white font-bold py-2 px-4 rounded hover:bg-indigo-600 transition-colors text-sm">Download</a>
+          </div>
+        `;
+      }
+      mainArea.appendChild(finalResultSection);
+    }
+
+    sel.addEventListener('change', render);
+    document.addEventListener('DOMContentLoaded', () => {
+      sel.value = 'sem1';
+      render();
+    });
+  </script>
+</body>
+</html>

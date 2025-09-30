@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Timetable</title>
+    <style>
+        :root {
+            --primary-color: #2b70b5;
+            --card-bg: #fff;
+            --text-color: #333;
+            --secondary-text-color: #666;
+            --border-color: #e0e0e0;
+            --highlight-color: #ffeb3b; /* A subtle yellow for highlighting */
+            --accent-color: #ff7043; /* For active state */
+            --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --main-bg-color: #0e0e1a;
+            --header-bg-color: #1e1e2e;
+
+            /* Subject-specific colors for color-coding */
+            --color-bcs301: #388e3c; /* DS */
+            --color-bcs302: #1976d2; /* COA */
+            --color-bcs303: #c2185b; /* DSTL */
+            --color-boe305: #fbc02d; /* S&I */
+            --color-bcc302: #4527a0; /* Python */
+            --color-bve301: #00796b; /* UHV&PE */
+            --color-bcs351: #388e3c; /* DS Lab - same as DS */
+            --color-bcs352: #1976d2; /* COA Lab - same as COA */
+            --color-bcs353: #f57c00; /* WDW */
+            --color-bcc351: #d32f2f; /* IA&MP */
+        }
+
+         body {
+      font-family: "Inter", sans-serif;
+      background-color: #0b0c2a;
+      color: #e5e7eb;
+    }
+
+    /* ✅ Logo style */
+    .logo {
+      height: 50px; /* fixed height */
+      width: auto;  /* keep natural aspect ratio */
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    /* ================= NAVBAR ================= */
+    :root {
+      --nav-h: 70px;
+      --accent1: #8b5cf6; /* violet */
+      --accent2: #d946ef; /* pink */
+    }
+
+    .navbar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(3, 8, 23, 0.6);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-text {
+      font-weight: 600;
+      color: #fff;
+      margin-left: 6px;
+      letter-spacing: 1px;
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links a {
+      display: inline-block;
+      padding: 8px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+      letter-spacing: 1px;
+    }
+
+    .nav-links a:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+      filter: brightness(1.05);
+    }
+
+    .nav-links a.active {
+      filter: brightness(1.2);
+      box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+    }
+
+    footer {
+      background-color: #161735;
+    }
+
+        /* Removed .logo-container span to remove the "SLISS" text */
+        
+        .home-button {
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 20px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            position: absolute;
+            right: 40px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+      
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background-color: #1e1e2e;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .view-toggle button {
+            flex: 1;
+            padding: 15px 0;
+            border: none;
+            background-color: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .view-toggle button.active {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .day-selector {
+            display: none;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding: 5px 0;
+        }
+
+        .day-selector button {
+            background-color: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            min-width: 45px;
+            min-height: 45px;
+            margin: 0 5px;
+            font-weight: 600;
+            color: #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-transform: uppercase;
+        }
+
+        .day-selector button.active {
+            background-color: #8b5cf6;
+            color: #fff;
+            border-color: #8b5cf6;
+        }
+
+        .timetable-container {
+            padding: 0 10px;
+        }
+
+        .today-view {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .weekly-view {
+            display: none;
+        }
+        
+        .class-card {
+            background-color: #2a2a3e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            transition: box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            color: white;
+            margin-bottom: 15px; /* Added spacing for cards in the new view */
+        }
+
+        .class-card:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .class-card.active {
+            animation: pulse-border 1.5s infinite;
+        }
+/* Center the whole timetable */
+.timetable-wrapper {
+  max-width: 1000px;   /* fixed size */
+  margin: 30px auto;   /* center horizontally */
+  padding: 20px;
+  background: #161735; /* optional background */
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Inner timetable cards spacing */
+.timetable-container {
+  margin-top: 20px;
+}
+
+        .time-info {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .subject-info {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 5px 0;
+        }
+
+        .subject-info small {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-left: 5px;
+        }
+
+        .details {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #444;
+            font-size: 0.9rem;
+        }
+
+        .class-card.expanded .details {
+            display: block;
+        }
+        
+        .empty-day {
+            text-align: center;
+            color: #ccc;
+            padding: 50px 20px;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 112, 67, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 112, 67, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 112, 67, 0); }
+        }
+
+        #daily-title {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #1e1e2e;
+            color: #c084fc;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+ <!-- 🔥 Fixed Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header> 
+
+  <!-- 🔹 Timetable Container -->
+  <div class="timetable-wrapper">
+    <div class="view-toggle">
+      <button id="today-btn" class="active">Today</button>
+      <button id="weekly-btn">Weekly</button>
+    </div>
+
+    <div class="timetable-container">
+      <div id="today-view" class="today-view"></div>
+      <div id="weekly-view" class="weekly-view">
+        <div class="day-selector">
+          <button id="mon-btn">M</button>
+          <button id="tue-btn">T</button>
+          <button id="wed-btn">W</button>
+          <button id="thu-btn">Th</button>
+          <button id="fri-btn">F</button>
+          <button id="sat-btn">Sa</button>
+        </div>
+        <h3 id="daily-title"></h3>
+        <div id="daily-schedule-container" class="timetable-container"></div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+        const timetableData = {
+            "2CSC": {
+                "MON": [
+                    { "period": 2, "time_start": "09:50", "time_end": "10:40", "subject_code": "BOE305", "subject_name": "Sensor and Instrumentation", "teacher": "Mr Prabhat Raghav", "room": "3F-BB2" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS303", "subject_name": "Discrete Structures Theory of Logic", "teacher": "Ms Preeti Singh", "room": "2F-BB1" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BCC351", "subject_name": "Internship Assessment/Mini Project", "teacher": "Mr Prabhat Raghav", "room": "2F-BB1" },
+                    { "period": 6, "time_start": "14:10", "time_end": "15:00", "subject_code": "BCS302", "subject_name": "Computer Organisation Architecture", "teacher": "Mr Laxman Singh", "room": "3F-07" },
+                    { "period": 7, "time_start": "15:00", "time_end": "15:50", "subject_code": "BVE301", "subject_name": "Universal Human Values Professional Ethics", "teacher": "Mr Kaushal Gupta", "room": "3F-BB2" },
+                    { "period": 8, "time_start": "15:50", "time_end": "16:40", "subject_code": "BCS303", "subject_name": "Discrete Structures Theory of Logic", "teacher": "Ms Preeti Singh", "room": "3F-BB2" }
+                ],
+                "TUE": [
+                    { "period": 2, "time_start": "09:50", "time_end": "10:40", "subject_code": "BCS303", "subject_name": "Discrete Structures Theory of Logic", "teacher": "Ms Preeti Singh", "room": "2F-BB1" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS302", "subject_name": "Computer Organisation Architecture", "teacher": "Mr Laxman Singh", "room": "3F-BB2" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BCS351", "subject_name": "Data Structures using C Lab", "teacher": "Mr Krishna Bihari Dubey", "room": "6F-01", "group": "Group 1" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BCS353", "subject_name": "Web Designing Workshop", "teacher": "Mr Devendra Vikram", "room": "6F-03", "group": "Group 2" },
+                    { "period": 5, "time_start": "12:20", "time_end": "13:10", "subject_code": "BCC302", "subject_name": "Python Programming", "teacher": "Mr. Ankit Kardam", "room": "3F-BB2" },
+                    { "period": 6, "time_start": "14:10", "time_end": "15:00", "subject_code": "BCS301", "subject_name": "Data Structures", "teacher": "Mr Krishna Bihari Dubey", "room": "3F-BB2" },
+                    { "period": 7, "time_start": "15:00", "time_end": "15:50", "subject_code": "BCC351", "subject_name": "Internship Assessment/Mini Project", "teacher": "Mr Prabhat Raghav", "room": "2F-BB1" },
+                    { "period": 8, "time_start": "15:50", "time_end": "16:40", "subject_code": "BCS302", "subject_name": "Computer Organisation Architecture", "teacher": "Mr Laxman Singh", "room": "2F-BB1" }
+                ],
+                "WED": [
+                    { "period": 2, "time_start": "09:50", "time_end": "10:40", "subject_code": "BCC351", "subject_name": "Internship Assessment/Mini Project", "teacher": "Mr Prabhat Raghav", "room": "2F-BB1" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS352", "subject_name": "Computer Organisation Architecture Lab", "teacher": "Mr Laxman Singh", "room": "3F-07", "group": "Group 1" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS351", "subject_name": "Data Structures using C Lab", "teacher": "Mr Krishna Bihari Dubey", "room": "6F-01", "group": "Group 2" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BCS353", "subject_name": "Web Designing Workshop", "teacher": "Mr Devendra Vikram", "room": "6F-03", "group": "Group 1" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BCS352", "subject_name": "Computer Organisation Architecture Lab", "teacher": "Mr Laxman Singh", "room": "3F-07", "group": "Group 2" }
+                ],
+                "THU": [
+                    { "period": 2, "time_start": "09:50", "time_end": "10:40", "subject_code": "BOE305", "subject_name": "Sensor and Instrumentation", "teacher": "Mr Prabhat Raghav", "room": "2F-BB1" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS301", "subject_name": "Data Structures", "teacher": "Mr Krishna Bihari Dubey", "room": "2F-BB1" },
+                    { "period": 6, "time_start": "14:10", "time_end": "15:00", "subject_code": "BCS302", "subject_name": "Computer Organisation Architecture", "teacher": "Mr Laxman Singh", "room": "3F-07" },
+                    { "period": 7, "time_start": "15:00", "time_end": "15:50", "subject_code": "BCC302", "subject_name": "Python Programming", "teacher": "Mr. Ankit Kardam", "room": "2F-BB1" }
+                ],
+                "FRI": [
+                    { "period": 2, "time_start": "09:50", "time_end": "10:40", "subject_code": "BCS303", "subject_name": "Discrete Structures Theory of Logic", "teacher": "Ms Preeti Singh", "room": "3F-BB2" },
+                    { "period": 3, "time_start": "10:40", "time_end": "11:30", "subject_code": "BCS302", "subject_name": "Computer Organisation Architecture", "teacher": "Mr Laxman Singh", "room": "2F-BB1" },
+                    { "period": 4, "time_start": "11:30", "time_end": "12:20", "subject_code": "BVE301", "subject_name": "Universal Human Values Professional Ethics", "teacher": "Mr Kaushal Gupta", "room": "3F-BB2" },
+                    { "period": 6, "time_start": "14:10", "time_end": "15:00", "subject_code": "BCS303", "subject_name": "Discrete Structures Theory of Logic", "teacher": "Ms Preeti Singh", "room": "3F-BB2" },
+                    { "period": 7, "time_start": "15:00", "time_end": "15:50", "subject_code": "BCS301", "subject_name": "Data Structures", "teacher": "Mr Krishna Bihari Dubey", "room": "3F-BB2" }
+                ],
+                "SAT": []
+            }
+        };
+
+        const todayBtn = document.getElementById('today-btn');
+        const weeklyBtn = document.getElementById('weekly-btn');
+        const todayView = document.getElementById('today-view');
+        const weeklyView = document.getElementById('weekly-view');
+        const daySelector = document.querySelector('.day-selector');
+        const dailyScheduleContainer = document.getElementById('daily-schedule-container');
+        const dayButtons = document.querySelectorAll('.day-selector button');
+        const dailyTitle = document.getElementById('daily-title');
+
+        let currentGroup = "2CSC";
+        let currentView = 'today';
+        let currentDayOfWeek = new Date().toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
+        
+        const formatTime = (time) => {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+            return `${formattedHours}:${String(minutes).padStart(2, '0')} ${period}`;
+        };
+
+        const isCurrentClass = (start, end) => {
+            const now = new Date();
+            const startParts = start.split(':');
+            const endParts = end.split(':');
+            const startTime = new Date();
+            const endTime = new Date();
+            startTime.setHours(parseInt(startParts[0]), parseInt(startParts[1]), 0);
+            endTime.setHours(parseInt(endParts[0]), parseInt(endParts[1]), 0);
+            return now >= startTime && now <= endTime;
+        };
+
+        const renderClassCard = (cls) => {
+            const card = document.createElement('div');
+            card.className = 'class-card';
+            card.style.borderLeftColor = getSubjectColor(cls.subject_code);
+
+            if (isCurrentClass(cls.time_start, cls.time_end)) {
+                card.classList.add('active');
+            }
+
+            card.innerHTML = `
+                <div class="time-info">${formatTime(cls.time_start)} - ${formatTime(cls.time_end)}</div>
+                <div class="subject-info">${cls.subject_name} <small>(${cls.subject_code})</small></div>
+                <div class="details">
+                    <div><strong>Teacher:</strong> ${cls.teacher}</div>
+                    <div><strong>Room:</strong> ${cls.room}</div>
+                    ${cls.group ? `<div><strong>Group:</strong> ${cls.group}</div>` : ""}
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                card.classList.toggle('expanded');
+            });
+
+            return card;
+        };
+
+        const renderDaySchedule = (day) => {
+            dailyScheduleContainer.innerHTML = '';
+            dailyTitle.textContent = getDayFullName(day);
+            if (timetableData[currentGroup][day] && timetableData[currentGroup][day].length > 0) {
+                timetableData[currentGroup][day].forEach(cls => {
+                    dailyScheduleContainer.appendChild(renderClassCard(cls));
+                });
+            } else {
+                dailyScheduleContainer.innerHTML = '<div class="empty-day">No classes scheduled.</div>';
+            }
+        };
+
+        const getDayFullName = (shortDay) => {
+            switch(shortDay) {
+                case 'MON': return 'Monday';
+                case 'TUE': return 'Tuesday';
+                case 'WED': return 'Wednesday';
+                case 'THU': return 'Thursday';
+                case 'FRI': return 'Friday';
+                case 'SAT': return 'Saturday';
+                default: return '';
+            }
+        };
+
+        const getSubjectColor = (subjectCode) => {
+            switch(subjectCode) {
+                case 'BCS301': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs301');
+                case 'BCS302': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs302');
+                case 'BCS303': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs303');
+                case 'BOE305': return getComputedStyle(document.documentElement).getPropertyValue('--color-boe305');
+                case 'BCC302': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcc302');
+                case 'BVE301': return getComputedStyle(document.documentElement).getPropertyValue('--color-bve301');
+                case 'BCS351': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs351');
+                case 'BCS352': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs352');
+                case 'BCS353': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcs353');
+                case 'BCC351': return getComputedStyle(document.documentElement).getPropertyValue('--color-bcc351');
+                default: return '#8b5cf6';
+            }
+        };
+
+        todayBtn.addEventListener('click', () => {
+            todayBtn.classList.add('active');
+            weeklyBtn.classList.remove('active');
+            todayView.style.display = 'flex';
+            weeklyView.style.display = 'none';
+            daySelector.style.display = 'none';
+            currentView = 'today';
+            renderTodaySchedule();
+        });
+
+        weeklyBtn.addEventListener('click', () => {
+            weeklyBtn.classList.add('active');
+            todayBtn.classList.remove('active');
+            todayView.style.display = 'none';
+            weeklyView.style.display = 'block';
+            daySelector.style.display = 'flex';
+            currentView = 'weekly';
+            renderDaySchedule(currentDayOfWeek);
+            highlightDayButton(currentDayOfWeek);
+        });
+
+        dayButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                dayButtons.forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                const selectedDay = button.id.split('-')[0].toUpperCase();
+                renderDaySchedule(selectedDay);
+            });
+        });
+
+        const highlightDayButton = (day) => {
+            dayButtons.forEach(b => b.classList.remove('active'));
+            const dayId = day.toLowerCase().substring(0,3);
+            const btn = document.getElementById(dayId + '-btn');
+            if (btn) btn.classList.add('active');
+        };
+
+        const renderTodaySchedule = () => {
+            todayView.innerHTML = '';
+            if (timetableData[currentGroup][currentDayOfWeek] && timetableData[currentGroup][currentDayOfWeek].length > 0) {
+                timetableData[currentGroup][currentDayOfWeek].forEach(cls => {
+                    todayView.appendChild(renderClassCard(cls));
+                });
+            } else {
+                todayView.innerHTML = '<div class="empty-day">No classes scheduled today.</div>';
+            }
+        };
+
+        // Initialize
+        renderTodaySchedule();
+    </script>
+</body>
+</html>

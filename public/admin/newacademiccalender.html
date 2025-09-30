@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Calendar Teacher Portal</title>
+  <style>
+    :root {
+      --primary-color: #8b5cf6; /* Accent purple */
+      --bg-dark: #0e0e1a;       /* Page background */
+      --card-bg: #1a1b26;       /* Card background */
+      --text-color: #e0e0e0;    /* Main text */
+      --muted-text: #a1a1aa;    /* Secondary text */
+      --danger: #ef4444;        /* Red */
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .calendar-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      font-size: 1.4em;
+      font-weight: 500;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .day-header {
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-color);
+      padding: 10px;
+      background: var(--card-bg);
+      border-radius: 8px;
+    }
+
+    .day {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      min-height: 120px;
+      padding: 10px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .day:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+    }
+
+    .day-number {
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--muted-text);
+    }
+
+    .event {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 5px 8px;
+      border-radius: 6px;
+      margin-top: 5px;
+      font-size: 0.85em;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .event:hover {
+      opacity: 0.9;
+    }
+
+    .delete-event {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      font-size: 0.8em;
+      cursor: pointer;
+      color: var(--muted-text);
+      background: none;
+      border: none;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #2a2a3a;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+
+    .close-button {
+      color: var(--muted-text);
+      float: right;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .close-button:hover {
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    input[type="text"], textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #2a2a3a;
+      border-radius: 8px;
+      background-color: #252634;
+      color: var(--text-color);
+      font-size: 1em;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #6d28d9;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Academic Calendar Teacher Portal</h1>
+  
+  <div class="calendar-nav">
+    <span id="prevMonth" style="cursor: pointer;">&lt;</span>
+    <span id="currentMonthYear">September 2025</span>
+    <span id="nextMonth" style="cursor: pointer;">&gt;</span>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="day-header">Sun</div>
+    <div class="day-header">Mon</div>
+    <div class="day-header">Tue</div>
+    <div class="day-header">Wed</div>
+    <div class="day-header">Thu</div>
+    <div class="day-header">Fri</div>
+    <div class="day-header">Sat</div>
+  </div>
+</div>
+
+<div id="eventModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <h2 id="modalTitle">Add Event</h2>
+    <input type="text" id="eventText" placeholder="Event Description">
+    <button id="saveEvent">Save Event</button>
+  </div>
+</div>
+
+<script>
+  const calendarGrid = document.querySelector('.calendar-grid');
+  const currentMonthYear = document.getElementById('currentMonthYear');
+  const prevMonth = document.getElementById('prevMonth');
+  const nextMonth = document.getElementById('nextMonth');
+  const eventModal = document.getElementById('eventModal');
+  const closeButton = document.querySelector('.close-button');
+  const saveEventButton = document.getElementById('saveEvent');
+  const eventText = document.getElementById('eventText');
+
+  let today = new Date();
+  let currentMonth = today.getMonth();
+  let currentYear = today.getFullYear();
+  let activeDay = null;
+  let events = JSON.parse(localStorage.getItem('academicEvents')) || {};
+
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const renderCalendar = (month, year) => {
+    calendarGrid.querySelectorAll('.day').forEach(d => d.remove());
+
+    currentMonthYear.textContent = `${months[month]} ${year}`;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const emptyDay = document.createElement('div');
+      emptyDay.className = 'day';
+      calendarGrid.appendChild(emptyDay);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'day';
+      dayDiv.innerHTML = `<div class="day-number">${day}</div>`;
+      dayDiv.dataset.date = `${year}-${month + 1}-${day}`;
+
+      const dateKey = dayDiv.dataset.date;
+      if (events[dateKey]) {
+        events[dateKey].forEach(eventText => {
+          const eventDiv = document.createElement('div');
+          eventDiv.className = 'event';
+          eventDiv.innerHTML = `${eventText} <button class="delete-event">&times;</button>`;
+          dayDiv.appendChild(eventDiv);
+        });
+      }
+
+      dayDiv.addEventListener('click', () => {
+        activeDay = dayDiv;
+        eventModal.style.display = 'block';
+        eventText.value = '';
+        document.getElementById('modalTitle').textContent = `Add Event for ${day}`;
+      });
+
+      calendarGrid.appendChild(dayDiv);
+    }
+
+    document.querySelectorAll('.delete-event').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const eventDiv = e.target.closest('.event');
+        const dayDiv = eventDiv.closest('.day');
+        const dateKey = dayDiv.dataset.date;
+        const eventTextToRemove = eventDiv.textContent.replace(' ×', '').trim();
+        
+        events[dateKey] = events[dateKey].filter(text => text !== eventTextToRemove);
+        if (events[dateKey].length === 0) {
+          delete events[dateKey];
+        }
+        localStorage.setItem('academicEvents', JSON.stringify(events));
+        renderCalendar(currentMonth, currentYear);
+      });
+    });
+  };
+
+  saveEventButton.addEventListener('click', () => {
+    if (activeDay && eventText.value) {
+      const dateKey = activeDay.dataset.date;
+      if (!events[dateKey]) {
+        events[dateKey] = [];
+      }
+      events[dateKey].push(eventText.value);
+      localStorage.setItem('academicEvents', JSON.stringify(events));
+      eventModal.style.display = 'none';
+      renderCalendar(currentMonth, currentYear);
+    }
+  });
+
+  closeButton.addEventListener('click', () => {
+    eventModal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === eventModal) {
+      eventModal.style.display = 'none';
+    }
+  });
+
+  prevMonth.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderCalendar(currentMonth, currentYear);
+  });
+
+  nextMonth.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderCalendar(currentMonth, currentYear);
+  });
+
+  renderCalendar(currentMonth, currentYear);
+</script>
+
+</body>
+</html>

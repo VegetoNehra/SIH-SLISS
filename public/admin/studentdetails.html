@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Application Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #1e1e2e;
+        color: white;
+      }
+      .card {
+        transition: transform 0.3s, background 0.3s;
+      }
+      .card:hover {
+        transform: scale(1.05);
+        background: #8b5cf6;
+        cursor: pointer;
+      }
+      .hidden { display: none; }
+
+      /* Fixed input styles for visible text */
+      .form-input {
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          background-color: #ffffff;
+          color: #000000; /* Text color black */
+          border: 1px solid #d1d5db;
+          outline: none;
+      }
+      .form-input::placeholder {
+          color: #6b7280; /* Tailwind gray-600 */
+      }
+      .form-input:focus {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 2px rgba(139,92,246,0.3);
+      }
+
+      .form-group label {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          margin-bottom: 0.25rem;
+      }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6">
+
+    <h1 class="text-4xl font-bold mb-12 text-center">Select The Year</h1>
+
+    <div id="yearSelection" class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+        <div onclick="showSections('1st')" class="card p-12 bg-purple-700 rounded-xl shadow-lg text-center">
+            <h2 class="text-3xl font-semibold">1st Year</h2>
+        </div>
+        <div onclick="showSections('2nd')" class="card p-12 bg-purple-600 rounded-xl shadow-lg text-center">
+            <h2 class="text-3xl font-semibold">2nd Year</h2>
+        </div>
+        <div onclick="showSections('3rd')" class="card p-12 bg-purple-500 rounded-xl shadow-lg text-center">
+            <h2 class="text-3xl font-semibold">3rd Year</h2>
+        </div>
+        <div onclick="showSections('4th')" class="card p-12 bg-purple-400 rounded-xl shadow-lg text-center">
+            <h2 class="text-3xl font-semibold">4th Year</h2>
+        </div>
+    </div>
+
+    <div id="sectionSelection" class="hidden flex flex-col items-center mt-12 w-full max-w-md">
+        <h2 id="selectedYear" class="text-2xl font-bold mb-6"></h2>
+        <div id="sectionsGrid" class="flex flex-col gap-4 w-full"></div>
+        <button onclick="backToYears()" class="mt-8 px-8 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition">Back</button>
+    </div>
+
+    <div id="studentListPage" class="hidden flex flex-col items-center mt-12 w-full max-w-2xl">
+        <h2 id="studentListHeading" class="text-2xl font-bold mb-6 text-center"></h2>
+        
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg w-full mb-6">
+            <div id="studentsList" class="flex flex-col gap-4"></div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg w-full flex flex-col gap-4">
+            <h3 class="text-xl font-semibold">Add New Student</h3>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input id="newStudentName" type="text" placeholder="Student Name" class="flex-1 form-input">
+                <input id="newStudentRollNo" type="text" placeholder="Roll Number" class="flex-1 form-input">
+                <button onclick="addStudent()" class="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-500 transition font-semibold text-white">Add Student</button>
+            </div>
+        </div>
+
+        <button onclick="backToSections()" class="mt-8 px-8 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition">Back to Branches/Sections</button>
+    </div>
+
+    <div id="studentFormPage" class="hidden flex flex-col items-center mt-12 w-full max-w-4xl">
+        <h2 id="formHeading" class="text-2xl font-bold mb-6 text-center">Student Details</h2>
+        <form class="bg-gray-800 p-8 rounded-xl shadow-lg w-full space-y-6" onsubmit="event.preventDefault(); saveChanges();">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-purple-400">Personal Details</h3>
+                    <div class="form-group">
+                        <label for="form-name">Name</label>
+                        <input id="form-name" type="text" placeholder="Full Name" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-dob">Date of Birth</label>
+                        <input id="form-dob" type="date" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-gender">Gender</label>
+                        <select id="form-gender" class="w-full form-input">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-contact">Contact Number</label>
+                        <input id="form-contact" type="tel" placeholder="e.g., +919876543210" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-email">Email Address</label>
+                        <input id="form-email" type="email" placeholder="e.g., student@example.com" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-address">Address</label>
+                        <textarea id="form-address" placeholder="Full Address" class="w-full form-input"></textarea>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-purple-400">Parents Details</h3>
+                    <div class="form-group">
+                        <label for="form-parents-name">Parents Name</label>
+                        <input id="form-parents-name" type="text" placeholder="Father's / Mother's Name" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-parents-contact">Parents Contact</label>
+                        <input id="form-parents-contact" type="tel" placeholder="e.g., +919988776655" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-parents-email">Parents Email</label>
+                        <input id="form-parents-email" type="email" placeholder="e.g., parents@example.com" class="w-full form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-purple-400">Admission Details</h3>
+                    <div class="form-group">
+                        <label for="form-admission-no">Admission No.</label>
+                        <input id="form-admission-no" type="text" placeholder="Admission Number" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-univ-roll-no">University Roll No.</label>
+                        <input id="form-univ-roll-no" type="text" placeholder="University Roll Number" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-admission-date">Admission Date</label>
+                        <input id="form-admission-date" type="date" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-status">Status</label>
+                        <input id="form-status" type="text" placeholder="e.g., Active, Inactive" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-session">Session</label>
+                        <input id="form-session" type="text" placeholder="e.g., 2024-2025" class="w-full form-input">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-purple-400">Course Details</h3>
+                    <div class="form-group">
+                        <label for="form-course">Course</label>
+                        <input id="form-course" type="text" placeholder="e.g., B.Tech, BCA" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-section">Section</label>
+                        <input id="form-section" type="text" placeholder="e.g., A, B, Sec 1" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-group">Group</label>
+                        <input id="form-group" type="text" placeholder="e.g., Group A, Group B" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-adm-sem">Admission Semester</label>
+                        <input id="form-adm-sem" type="text" placeholder="e.g., Sem 1" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-current-sem">Current Semester</label>
+                        <input id="form-current-sem" type="text" placeholder="e.g., Sem 1, Sem 3" class="w-full form-input">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-purple-400">Other Details</h3>
+                    <div class="form-group">
+                        <label for="form-quota">Quota</label>
+                        <input id="form-quota" type="text" placeholder="e.g., General, OBC, SC" class="w-full form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-hostel">Hostel</label>
+                        <select id="form-hostel" class="w-full form-input">
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-mess">Mess</label>
+                        <select id="form-mess" class="w-full form-input">
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-transport">Transport</label>
+                        <select id="form-transport" class="w-full form-input">
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-4 mt-8">
+                <button type="button" onclick="backToStudents()" class="px-8 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition font-semibold">Back to List</button>
+                <button type="submit" class="px-8 py-3 bg-green-600 rounded-lg hover:bg-green-500 transition font-semibold">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const studentsData = {
+            '1st': {
+                'Sec 1': [
+                    { name: 'Aarav Sharma', rollNo: '101', dob: '2006-05-15', gender: 'Male', contact: '9876543210', email: 'aarav.s@example.com', address: '123, Green Street, Delhi', parentsName: 'Mr. & Mrs. Sharma', parentsContact: '9876543211', parentsEmail: 'sharma.p@example.com', admissionNo: 'SL24-101', univRollNo: 'U24-101', admissionDate: '2024-08-10', status: 'Active', session: '2024-2025', course: 'B.Tech', section: 'Sec 1', group: 'A', admSem: 'Sem 1', currentSem: 'Sem 1', quota: 'General', hostel: 'Yes', mess: 'Yes', transport: 'No' },
+                    { name: 'Priya Verma', rollNo: '102', dob: '2006-10-20', gender: 'Female', contact: '9876543212', email: 'priya.v@example.com', address: '456, Blue Avenue, Mumbai', parentsName: 'Mr. & Mrs. Verma', parentsContact: '9876543213', parentsEmail: 'verma.p@example.com', admissionNo: 'SL24-102', univRollNo: 'U24-102', admissionDate: '2024-08-11', status: 'Active', session: '2024-2025', course: 'B.Tech', section: 'Sec 1', group: 'A', admSem: 'Sem 1', currentSem: 'Sem 1', quota: 'OBC', hostel: 'No', mess: 'No', transport: 'Yes' }
+                ],
+                'Sec 2': [], 'Sec 3': [], 'Sec 4': [], 'Sec 5': []
+            },
+            '2nd': {
+                'CSE': [
+                    { name: 'Rohan Malik', rollNo: 'CSE-2023-10', dob: '2005-03-12', gender: 'Male', contact: '8877665544', email: 'rohan.m@example.com', address: '789, Rose Street, Noida', parentsName: 'Mr. & Mrs. Malik', parentsContact: '8877665545', parentsEmail: 'malik.p@example.com', admissionNo: 'SL23-110', univRollNo: 'U23-110', admissionDate: '2023-07-15', status: 'Active', session: '2023-2024', course: 'B.Tech CSE', section: 'Sec A', group: 'X', admSem: 'Sem 1', currentSem: 'Sem 3', quota: 'General', hostel: 'Yes', mess: 'Yes', transport: 'No' },
+                    { name: 'Sana Khan', rollNo: 'CSE-2023-11', dob: '2005-09-05', gender: 'Female', contact: '8877665546', email: 'sana.k@example.com', address: '101, Oak Street, Gurgaon', parentsName: 'Mr. & Mrs. Khan', parentsContact: '8877665547', parentsEmail: 'khan.p@example.com', admissionNo: 'SL23-111', univRollNo: 'U23-111', admissionDate: '2023-07-16', status: 'Active', session: '2023-2024', course: 'B.Tech CSE', section: 'Sec A', group: 'X', admSem: 'Sem 1', currentSem: 'Sem 3', quota: 'General', hostel: 'Yes', mess: 'Yes', transport: 'No' }
+                ],
+                'AI': [], 'DS': [], 'IT': []
+            },
+            '3rd': { 'CSE': [], 'AI': [], 'DS': [], 'IT': [] },
+            '4th': { 'CSE': [], 'AI': [], 'DS': [], 'IT': [] }
+        };
+
+        let currentYear = '';
+        let currentSelection = '';
+        let currentStudentIndex = -1;
+
+        function showStudentForm(student, index) {
+            currentStudentIndex = index;
+            document.getElementById('studentListPage').classList.add('hidden');
+            document.getElementById('studentFormPage').classList.remove('hidden');
+            
+            document.getElementById('form-name').value = student.name || '';
+            document.getElementById('form-dob').value = student.dob || '';
+            document.getElementById('form-gender').value = student.gender || '';
+            document.getElementById('form-contact').value = student.contact || '';
+            document.getElementById('form-email').value = student.email || '';
+            document.getElementById('form-address').value = student.address || '';
+            document.getElementById('form-parents-name').value = student.parentsName || '';
+            document.getElementById('form-parents-contact').value = student.parentsContact || '';
+            document.getElementById('form-parents-email').value = student.parentsEmail || '';
+            document.getElementById('form-admission-no').value = student.admissionNo || '';
+            document.getElementById('form-univ-roll-no').value = student.univRollNo || '';
+            document.getElementById('form-admission-date').value = student.admissionDate || '';
+            document.getElementById('form-status').value = student.status || '';
+            document.getElementById('form-session').value = student.session || '';
+            document.getElementById('form-course').value = student.course || '';
+            document.getElementById('form-section').value = student.section || '';
+            document.getElementById('form-group').value = student.group || '';
+            document.getElementById('form-adm-sem').value = student.admSem || '';
+            document.getElementById('form-current-sem').value = student.currentSem || '';
+            document.getElementById('form-quota').value = student.quota || '';
+            document.getElementById('form-hostel').value = student.hostel || '';
+            document.getElementById('form-mess').value = student.mess || '';
+            document.getElementById('form-transport').value = student.transport || '';
+        }
+
+        function saveChanges() {
+            const student = {
+                name: document.getElementById('form-name').value,
+                dob: document.getElementById('form-dob').value,
+                gender: document.getElementById('form-gender').value,
+                contact: document.getElementById('form-contact').value,
+                email: document.getElementById('form-email').value,
+                address: document.getElementById('form-address').value,
+                parentsName: document.getElementById('form-parents-name').value,
+                parentsContact: document.getElementById('form-parents-contact').value,
+                parentsEmail: document.getElementById('form-parents-email').value,
+                admissionNo: document.getElementById('form-admission-no').value,
+                univRollNo: document.getElementById('form-univ-roll-no').value,
+                admissionDate: document.getElementById('form-admission-date').value,
+                status: document.getElementById('form-status').value,
+                session: document.getElementById('form-session').value,
+                course: document.getElementById('form-course').value,
+                section: document.getElementById('form-section').value,
+                group: document.getElementById('form-group').value,
+                admSem: document.getElementById('form-adm-sem').value,
+                currentSem: document.getElementById('form-current-sem').value,
+                quota: document.getElementById('form-quota').value,
+                hostel: document.getElementById('form-hostel').value,
+                mess: document.getElementById('form-mess').value,
+                transport: document.getElementById('form-transport').value
+            };
+
+            if (currentStudentIndex >= 0) {
+                studentsData[currentYear][currentSelection][currentStudentIndex] = student;
+            } else {
+                studentsData[currentYear][currentSelection].push(student);
+            }
+
+            alert("✅ Student details saved successfully!");
+            backToStudents();
+        }
+
+        function addStudent() {
+            const name = document.getElementById('newStudentName').value.trim();
+            const rollNo = document.getElementById('newStudentRollNo').value.trim();
+
+            if (!name || !rollNo) {
+                alert("⚠ Please enter both Name and Roll Number");
+                return;
+            }
+
+            const newStudent = {
+                name, rollNo, dob: '', gender: '', contact: '', email: '',
+                address: '', parentsName: '', parentsContact: '', parentsEmail: '',
+                admissionNo: '', univRollNo: '', admissionDate: '', status: '',
+                session: '', course: '', section: '', group: '', admSem: '',
+                currentSem: '', quota: '', hostel: '', mess: '', transport: ''
+            };
+
+            studentsData[currentYear][currentSelection].push(newStudent);
+            document.getElementById('newStudentName').value = '';
+            document.getElementById('newStudentRollNo').value = '';
+            loadStudents(currentYear, currentSelection);
+        }
+
+        function loadStudents(year, section) {
+            currentYear = year;
+            currentSelection = section;
+            document.getElementById('sectionSelection').classList.add('hidden');
+            document.getElementById('studentListPage').classList.remove('hidden');
+
+            document.getElementById('studentListHeading').textContent = `${year} Year - ${section}`;
+            const studentsListDiv = document.getElementById('studentsList');
+            studentsListDiv.innerHTML = '';
+
+            studentsData[year][section].forEach((student, index) => {
+                const studentCard = document.createElement('div');
+                studentCard.className = "p-4 bg-purple-600 rounded-lg shadow flex justify-between items-center";
+                studentCard.innerHTML = `
+                    <span class="font-semibold">${student.name} (${student.rollNo || 'No Roll No'})</span>
+                    <button onclick="showStudentForm(studentsData['${year}']['${section}'][${index}], ${index})" 
+                        class="px-4 py-2 bg-gray-900 rounded-lg hover:bg-gray-700 transition text-sm font-semibold">View/Edit</button>
+                `;
+                studentsListDiv.appendChild(studentCard);
+            });
+        }
+
+        function showSections(year) {
+            currentYear = year;
+            document.getElementById('yearSelection').classList.add('hidden');
+            document.getElementById('sectionSelection').classList.remove('hidden');
+            document.getElementById('selectedYear').textContent = `${year} Year`;
+
+            const sectionsGrid = document.getElementById('sectionsGrid');
+            sectionsGrid.innerHTML = '';
+
+            Object.keys(studentsData[year]).forEach(section => {
+                const sectionBtn = document.createElement('button');
+                sectionBtn.textContent = section;
+                sectionBtn.className = "px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-500 transition";
+                sectionBtn.onclick = () => loadStudents(year, section);
+                sectionsGrid.appendChild(sectionBtn);
+            });
+        }
+
+        function backToYears() {
+            document.getElementById('sectionSelection').classList.add('hidden');
+            document.getElementById('yearSelection').classList.remove('hidden');
+        }
+
+        function backToSections() {
+            document.getElementById('studentListPage').classList.add('hidden');
+            document.getElementById('sectionSelection').classList.remove('hidden');
+        }
+
+        function backToStudents() {
+            document.getElementById('studentFormPage').classList.add('hidden');
+            document.getElementById('studentListPage').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

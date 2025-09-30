@@ -1,0 +1,110 @@
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: #0a0a1a;
+  color: #f1f1f1;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  background-color: #0a0a1a;
+}
+
+.navbar img {
+  height: 40px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #c084fc;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  color: #d1d1d1;
+}
+
+.btn {
+  background: linear-gradient(90deg, #8b5cf6, #d946ef);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: opacity 0.3s;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+/* ERP Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 50px;
+}
+
+.tab {
+  background: #1a1a2e;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.tab:hover {
+  background: linear-gradient(90deg, #8b5cf6, #d946ef);
+  transform: translateY(-3px);
+}
+
+.tab-content {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #111122;
+  padding: 30px;
+  border-radius: 16px;
+}
+
+/* About Page */
+.about {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 20px;
+  background: #111122;
+  border-radius: 16px;
+  line-height: 1.8;
+}

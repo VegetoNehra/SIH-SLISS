@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Feedback - SLISS</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0b0c2a;
+        color: #e5e7eb;
+      }
+      .logo {
+        height: 50px;
+        width: auto;
+        display: block;
+        transition: transform 0.3s ease, filter 0.3s ease;
+        cursor: pointer;
+      }
+      .logo:hover {
+        transform: scale(1.1);
+        filter: brightness(1.2);
+      }
+      :root {
+        --nav-h: 70px;
+        --accent1: #8b5cf6;
+        --accent2: #d946ef;
+      }
+      .navbar {
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background: rgba(3, 8, 23, 0.6);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand-text {
+        font-weight: 600;
+        color: #fff;
+        margin-left: 6px;
+        letter-spacing: 1px;
+        font-size: 20px;
+        opacity: 0.95;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .nav-links a {
+        display: inline-block;
+        padding: 8px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        background: linear-gradient(90deg, var(--accent1), var(--accent2));
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+        transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+        letter-spacing: 1px;
+      }
+      .nav-links a:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+        filter: brightness(1.05);
+      }
+      .nav-links a.active {
+        filter: brightness(1.2);
+        box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+      }
+      .card {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #141428;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+      }
+      h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+        color: #c084fc;
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #bbb;
+      }
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #333344;
+        background: #1e1e2e;
+        color: white;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+      .stars {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 20px;
+      }
+      .star {
+        font-size: 24px;
+        cursor: pointer;
+        transition: color 0.3s;
+        color: #555;
+      }
+      .star.selected,
+      .star.hovered {
+        color: #facc15;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(90deg, #8b5cf6, #d946ef);
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .submit-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+      .success-message {
+        background: #10b981;
+        color: white;
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 15px;
+        display: none;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="nav-left">
+        <img src="logo.png" alt="SLISS Logo" class="logo" />
+        <span class="brand-text">SLISS</span>
+      </div>
+      <nav class="nav-links">
+        <a href="submit.html" class="active">Home</a>
+        <a href="about.html">About</a>
+      </nav>
+    </header>
+
+    <!-- Feedback Form -->
+    <div class="card">
+      <h1>Teacher Feedback</h1>
+
+      <label for="teacher">Select Teacher</label>
+      <select id="teacher">
+        <option value="" disabled selected>Select a teacher</option>
+        <option>Ankit Kardam</option>
+        <option>Krishna Bihari Dubey</option>
+        <option>Laxman Singh</option>
+        <option>Prabhat Raghav</option>
+        <option>Priya Singh</option>
+        <option>Kaushal Gupta</option>
+      </select>
+
+      <div id="feedbackCategories"></div>
+
+      <label for="comments">Additional Comments</label>
+      <textarea id="comments" placeholder="Write your feedback here..."></textarea>
+
+      <button class="submit-btn" id="submitBtn">Submit Feedback</button>
+      <div class="success-message" id="successMessage">
+        ✅ Thank you! Your feedback has been submitted.
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "/api/feedback"; // ✅ backend route
+
+      const categories = [
+        "Knowledge",
+        "Behaviour",
+        "Communication Skill",
+        "Nature",
+        "Punctuality",
+        "Helpfulness",
+        "Teaching Methods",
+      ];
+
+      const feedbackContainer = document.getElementById("feedbackCategories");
+      const teacherSelect = document.getElementById("teacher");
+      const successMessage = document.getElementById("successMessage");
+      const teacherRatings = {};
+
+      function renderStars() {
+        feedbackContainer.innerHTML = "";
+        categories.forEach((cat) => {
+          const label = document.createElement("label");
+          label.textContent = cat;
+          feedbackContainer.appendChild(label);
+
+          const div = document.createElement("div");
+          div.className = "stars";
+          div.dataset.category = cat;
+
+          const currentTeacher = teacherSelect.value;
+          const ratings = currentTeacher ? teacherRatings[currentTeacher] || {} : {};
+
+          for (let i = 1; i <= 5; i++) {
+            const star = document.createElement("span");
+            star.className = "star";
+            star.innerHTML = "&#9733;";
+            star.dataset.value = i;
+
+            star.addEventListener("mouseover", () => {
+              Array.from(div.children).forEach((s) => s.classList.remove("hovered"));
+              for (let j = 0; j < i; j++) div.children[j].classList.add("hovered");
+            });
+
+            star.addEventListener("mouseout", () => {
+              Array.from(div.children).forEach((s, idx) => {
+                s.classList.remove("hovered");
+                if (ratings[cat] && idx < ratings[cat]) s.classList.add("selected");
+              });
+            });
+
+            star.addEventListener("click", () => {
+              if (!currentTeacher) return;
+              if (!teacherRatings[currentTeacher]) teacherRatings[currentTeacher] = {};
+              teacherRatings[currentTeacher][cat] = i;
+              Array.from(div.children).forEach((s, idx) =>
+                s.classList.toggle("selected", idx < i)
+              );
+            });
+
+            if (ratings[cat] && i <= ratings[cat]) {
+              star.classList.add("selected");
+            }
+
+            div.appendChild(star);
+          }
+          feedbackContainer.appendChild(div);
+        });
+      }
+
+      teacherSelect.addEventListener("change", renderStars);
+
+      document.getElementById("submitBtn").addEventListener("click", async () => {
+        const teacher = teacherSelect.value;
+        const comments = document.getElementById("comments").value;
+
+        if (!teacher) {
+          alert("Please select a teacher.");
+          return;
+        }
+
+        const ratings = teacherRatings[teacher] || {};
+        const allFilled = categories.every((cat) => ratings[cat]);
+
+        if (!allFilled) {
+          alert("Please rate all categories before submitting.");
+          return;
+        }
+
+        const payload = {
+          teacher,
+          knowledge: ratings["Knowledge"],
+          behaviour: ratings["Behaviour"],
+          communication_skill: ratings["Communication Skill"],
+          nature: ratings["Nature"],
+          punctuality: ratings["Punctuality"],
+          helpfulness: ratings["Helpfulness"],
+          teaching_methods: ratings["Teaching Methods"],
+          comments,
+        };
+
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            successMessage.style.display = "block";
+            teacherSelect.value = "";
+            document.getElementById("comments").value = "";
+            renderStars();
+          } else {
+            alert("Error submitting feedback.");
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          alert("Server error.");
+        }
+      });
+
+      renderStars();
+    </script>
+  </body>
+</html>

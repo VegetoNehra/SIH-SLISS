@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Mental Health Support</title>
+    <style>
+        body {
+            background-color: #0e0e1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+
+        .card {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #141428;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #c084fc;
+            text-align: center;
+        }
+
+        .complaint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .complaint-table th, .complaint-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #2c2c2c;
+        }
+        
+        .complaint-table th {
+            color: #bb86fc;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .complaint-table tr:hover {
+            background-color: #1e1e2e;
+        }
+
+        .status-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .status-button.pending {
+            background-color: #f44336;
+        }
+        .status-button.in-progress {
+            background-color: #ff9800;
+        }
+        .status-button.resolved {
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Mental Health Support Admin Portal</h1>
+    
+    <div id="no-complaints-message" style="text-align: center; margin-top: 20px; font-style: italic; color: #aaa;">
+        No new complaints submitted.
+    </div>
+
+    <div class="table-container">
+        <table class="complaint-table" id="complaintTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Complaint ID</th>
+                    <th>Date</th>
+                    <th>Issue</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="complaint-body">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Simulate data storage for mental health complaints
+    // In a real application, this would come from a server-side database.
+    const initialComplaints = [
+        { id: "MH001", date: "2025-09-08", issue: "Experienced a verbal harassment incident in the common area.", status: "Pending" },
+        { id: "MH002", date: "2025-09-09", issue: "Feeling overwhelmed and stressed due to academic pressure.", status: "Resolved" },
+        { id: "MH003", date: "2025-09-10", issue: "Witnessed a bullying incident in the cafeteria.", status: "In-Progress" },
+        { id: "MH004", date: "2025-09-11", issue: "I've been feeling isolated from my friends lately and need to talk to someone.", status: "Pending" },
+    ];
+
+    // Use localStorage to persist the complaint data
+    const complaints = JSON.parse(localStorage.getItem('adminComplaints')) || initialComplaints;
+
+    const complaintBody = document.getElementById('complaint-body');
+    const complaintTable = document.getElementById('complaintTable');
+    const noComplaintsMessage = document.getElementById('no-complaints-message');
+
+    // Function to render the table with complaints
+    const renderComplaints = () => {
+        complaintBody.innerHTML = '';
+        if (complaints.length === 0) {
+            complaintTable.style.display = 'none';
+            noComplaintsMessage.style.display = 'block';
+            return;
+        }
+
+        complaintTable.style.display = 'table';
+        noComplaintsMessage.style.display = 'none';
+
+        complaints.forEach(complaint => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${complaint.id}</td>
+                <td>${complaint.date}</td>
+                <td>${complaint.issue}</td>
+                <td>
+                    <button class="status-button ${complaint.status.toLowerCase().replace('-', '')}">
+                        ${complaint.status}
+                    </button>
+                </td>
+            `;
+            complaintBody.appendChild(row);
+        });
+    };
+
+    // Event listener to change complaint status
+    complaintBody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('status-button')) {
+            const row = e.target.closest('tr');
+            const complaintId = row.querySelector('td').textContent;
+            
+            const complaint = complaints.find(c => c.id === complaintId);
+
+            if (complaint) {
+                // Cycle through statuses: Pending -> In-Progress -> Resolved -> Pending
+                if (complaint.status === "Pending") {
+                    complaint.status = "In-Progress";
+                } else if (complaint.status === "In-Progress") {
+                    complaint.status = "Resolved";
+                } else {
+                    complaint.status = "Pending";
+                }
+
+                // Update localStorage and re-render the table
+                localStorage.setItem('adminComplaints', JSON.stringify(complaints));
+                renderComplaints();
+            }
+        }
+    });
+
+    // Initial render of the complaints
+    renderComplaints();
+</script>
+
+</body>
+</html>

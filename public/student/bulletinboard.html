@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLISS Student Notice Board</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #0b0c2a;
+      color: #e5e7eb;
+    }
+    .logo {
+      height: 50px;
+      width: auto;
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+    .logo:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+    :root {
+      --nav-h: 70px;
+      --accent1: #8b5cf6;
+      --accent2: #d946ef;
+    }
+    .navbar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(3, 8, 23, 0.6);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .brand-text {
+      font-weight: 600; color: #fff; margin-left: 6px;
+      letter-spacing: 1px; font-size: 20px; opacity: 0.95;
+    }
+    .nav-links { display: flex; align-items: center; gap: 12px; }
+    .nav-links a {
+      display: inline-block; padding: 8px 28px;
+      border-radius: 30px; text-decoration: none; color: #fff;
+      font-weight: 600; font-size: 15px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+      letter-spacing: 1px;
+    }
+    .nav-links a:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+      filter: brightness(1.05);
+    }
+    .nav-links a.active {
+      filter: brightness(1.2);
+      box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+    }
+    .notice-card {
+      background: #1e293b;
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .notice-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+
+<body class="text-gray-200">
+  <div class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="nav-left">
+        <img src="logo.png" alt="SLISS Logo" class="logo" />
+        <span class="brand-text">SLISS</span>
+      </div>
+      <nav class="nav-links">
+        <a href="submit.html" class="active">Home</a>
+        <a href="about.html">About</a>
+      </nav>
+    </header>
+
+    <!-- Title Section -->
+    <section class="text-center mt-10 mb-8">
+      <h1 class="text-4xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+        Bulletin Board
+      </h1>
+      <p class="text-gray-300 mt-2">Important announcements, events, and updates for students.</p>
+      <button id="toggleButton" class="mt-6 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:opacity-90 transition">
+        Show Notices
+      </button>
+    </section>
+
+    <!-- Notices Grid -->
+    <main id="notices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto"></main>
+
+    <!-- JavaScript -->
+    <script>
+      const API_URL = "http://localhost:5000/api/bulletin"; // ✅ backend route
+
+      function createNoticeCard(notice) {
+        let colorClass = "bg-blue-500";
+        let icon = "📢";
+
+        switch (notice.category) {
+          case "exam": colorClass = "bg-red-500"; icon = "📝"; break;
+          case "events": colorClass = "bg-green-500"; icon = "📅"; break;
+          case "meeting": colorClass = "bg-purple-500"; icon = "🤝"; break;
+          case "announcement": colorClass = "bg-blue-500"; icon = "📢"; break;
+        }
+
+        const formattedDate = new Date(notice.date).toLocaleDateString("en-US", {
+          year: "numeric", month: "long", day: "numeric"
+        });
+
+        return `
+          <div class="notice-card p-6 relative">
+            <div class="absolute top-0 right-0 ${colorClass} text-white text-xs font-bold py-1 px-4 rounded-bl-xl">
+              ${icon} ${notice.category}
+            </div>
+            <h2 class="text-2xl font-bold mb-2">${notice.title}</h2>
+            <p class="text-sm text-gray-400 mb-4">${formattedDate}</p>
+            <p class="text-gray-300 leading-relaxed">${notice.content}</p>
+          </div>
+        `;
+      }
+
+      function renderNotices(notices) {
+        const container = document.getElementById("notices-container");
+        container.innerHTML = "";
+
+        if (!notices || notices.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-1 md:col-span-2 text-center p-8 bg-[#1e293b] rounded-2xl shadow-lg">
+              <h2 class="text-2xl font-bold text-gray-300">No updates available at the moment.</h2>
+              <p class="mt-2 text-gray-500">Please check back later for new announcements.</p>
+            </div>
+          `;
+          return;
+        }
+
+        notices.forEach(notice => {
+          container.innerHTML += createNoticeCard(notice);
+        });
+      }
+
+      async function loadNotices() {
+        try {
+          const res = await fetch(API_URL);
+          const data = await res.json();
+          return data;
+        } catch (err) {
+          console.error("Failed to fetch notices:", err);
+          return [];
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const toggleButton = document.getElementById("toggleButton");
+        renderNotices([]);
+
+        toggleButton.addEventListener("click", async () => {
+          if (toggleButton.textContent === "Show Notices") {
+            const notices = await loadNotices();
+            renderNotices(notices);
+            toggleButton.textContent = "Clear Notices";
+          } else {
+            renderNotices([]);
+            toggleButton.textContent = "Show Notices";
+          }
+        });
+      });
+    </script>
+  </div>
+</body>
+</html>

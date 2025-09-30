@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Editable Timetable</title>
+    <style>
+      :root {
+        --main-bg-color: #0e0e1a;
+        --header-bg-color: #1e1e2e;
+        --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --accent: #8b5cf6;
+        --card-bg: #2a2a3e;
+        --muted: #ccc;
+        --danger: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-family);
+        background: var(--main-bg-color);
+        color: white;
+      }
+      .header-section {
+        padding: 15px 40px;
+        background: var(--header-bg-color);
+        position: sticky;
+        top: 0;
+      }
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+      .view-toggle {
+        display: flex;
+        margin-bottom: 20px;
+        background: #1e1e2e;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .view-toggle button {
+        flex: 1;
+        padding: 12px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .view-toggle button.active {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .day-selector {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+        gap: 8px;
+      }
+      .day-selector button {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 1px solid #333;
+        background: #1e1e2e;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .day-selector button.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      #daily-title,
+      #today-title {
+        text-align: center;
+        margin-bottom: 16px;
+        padding: 10px;
+        background: #1e1e2e;
+        color: #c084fc;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      .class-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        border-left: 5px solid;
+        position: relative;
+      }
+      .time-info {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .subject-info {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .details {
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+
+      /* delete icon/button shown only in edit mode for that day */
+      .delete-btn {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        background: transparent;
+        border: 0;
+        color: #fff;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        font-size: 14px;
+        display: none;
+      }
+      .delete-btn.visible {
+        display: block;
+        background: rgba(255, 0, 0, 0.15);
+        border: 1px solid rgba(255, 0, 0, 0.25);
+        color: var(--danger);
+      }
+
+      /* edit panel and controls */
+      .edit-panel {
+        background: #141424;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        border: 1px solid #2a2a3e;
+      }
+      .edit-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .edit-row .full {
+        grid-column: 1/-1;
+      }
+      .edit-panel input,
+      .edit-panel select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #333;
+        background: #0f0f1a;
+        color: white;
+      }
+      .edit-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 8px;
+      }
+      .btn {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 0;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn.add {
+        background: #10b981;
+        color: white;
+      }
+      .btn.cancel {
+        background: #6b7280;
+        color: white;
+      }
+      .btn.open-edit {
+        display: block;
+        margin: 18px auto 0;
+        background: var(--accent);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 6px;
+        border: 0;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .small-muted {
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header-section"><h1>Timetable</h1></header>
+
+    <div class="container">
+      <div class="view-toggle">
+        <button id="today-btn" class="active">Today</button>
+        <button id="weekly-btn">Weekly</button>
+      </div>
+
+      <div id="today-view"></div>
+
+      <div id="weekly-view" style="display: none">
+        <div class="day-selector">
+          <button id="mon-btn">M</button>
+          <button id="tue-btn">T</button>
+          <button id="wed-btn">W</button>
+          <button id="thu-btn">Th</button>
+          <button id="fri-btn">F</button>
+          <button id="sat-btn">Sa</button>
+        </div>
+
+        <h3 id="daily-title"></h3>
+        <div id="daily-schedule-container"></div>
+      </div>
+    </div>
+
+    <script>
+      // ---------- DATA (your full JSON timetable) ----------
+      const timetableData = {
+        MON: [
+          {
+            period: 1,
+            time_start: "09:50",
+            time_end: "10:40",
+            subject_code: "BOE305",
+            subject_name: "Sensor and Instrumentation",
+            teacher: "Mr Prabhat Raghav",
+            room: "3F-BB2",
+          },
+          {
+            period: 2,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS303",
+            subject_name: "Discrete Structures Theory of Logic",
+            teacher: "Ms Preeti Singh",
+            room: "2F-BB1",
+          },
+          {
+            period: 3,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BCC351",
+            subject_name: "Internship Assessment/Mini Project",
+            teacher: "Mr Prabhat Raghav",
+            room: "2F-BB1",
+          },
+          {
+            period: 4,
+            time_start: "14:10",
+            time_end: "15:00",
+            subject_code: "BCS302",
+            subject_name: "Computer Organisation Architecture",
+            teacher: "Mr Laxman Singh",
+            room: "3F-07",
+          },
+          {
+            period: 5,
+            time_start: "15:00",
+            time_end: "15:50",
+            subject_code: "BVE301",
+            subject_name: "Universal Human Values Professional Ethics",
+            teacher: "Mr Kaushal Gupta",
+            room: "3F-BB2",
+          },
+          {
+            period: 6,
+            time_start: "15:50",
+            time_end: "16:40",
+            subject_code: "BCS303",
+            subject_name: "Discrete Structures Theory of Logic",
+            teacher: "Ms Preeti Singh",
+            room: "3F-BB2",
+          },
+        ],
+        TUE: [
+          {
+            period: 1,
+            time_start: "09:50",
+            time_end: "10:40",
+            subject_code: "BCS303",
+            subject_name: "Discrete Structures Theory of Logic",
+            teacher: "Ms Preeti Singh",
+            room: "2F-BB1",
+          },
+          {
+            period: 2,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS302",
+            subject_name: "Computer Organisation Architecture",
+            teacher: "Mr Laxman Singh",
+            room: "3F-BB2",
+          },
+          {
+            period: 3,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BCS351",
+            subject_name: "Data Structures using C Lab",
+            teacher: "Mr Krishna Bihari Dubey",
+            room: "6F-01",
+            group: "Group 1",
+          },
+          {
+            period: 4,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BCS353",
+            subject_name: "Web Designing Workshop",
+            teacher: "Mr Devendra Vikram",
+            room: "6F-03",
+            group: "Group 2",
+          },
+          {
+            period: 5,
+            time_start: "12:20",
+            time_end: "13:10",
+            subject_code: "BCC302",
+            subject_name: "Python Programming",
+            teacher: "Mr. Ankit Kardam",
+            room: "3F-BB2",
+          },
+          {
+            period: 6,
+            time_start: "14:10",
+            time_end: "15:00",
+            subject_code: "BCS301",
+            subject_name: "Data Structures",
+            teacher: "Mr Krishna Bihari Dubey",
+            room: "3F-BB2",
+          },
+          {
+            period: 7,
+            time_start: "15:00",
+            time_end: "15:50",
+            subject_code: "BCC351",
+            subject_name: "Internship Assessment/Mini Project",
+            teacher: "Mr Prabhat Raghav",
+            room: "2F-BB1",
+          },
+          {
+            period: 8,
+            time_start: "15:50",
+            time_end: "16:40",
+            subject_code: "BCS302",
+            subject_name: "Computer Organisation Architecture",
+            teacher: "Mr Laxman Singh",
+            room: "2F-BB1",
+          },
+        ],
+        WED: [
+          {
+            period: 1,
+            time_start: "09:50",
+            time_end: "10:40",
+            subject_code: "BCC351",
+            subject_name: "Internship Assessment/Mini Project",
+            teacher: "Mr Prabhat Raghav",
+            room: "2F-BB1",
+          },
+          {
+            period: 2,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS352",
+            subject_name: "Computer Organisation Architecture Lab",
+            teacher: "Mr Laxman Singh",
+            room: "3F-07",
+            group: "Group 1",
+          },
+          {
+            period: 3,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS351",
+            subject_name: "Data Structures using C Lab",
+            teacher: "Mr Krishna Bihari Dubey",
+            room: "6F-01",
+            group: "Group 2",
+          },
+          {
+            period: 4,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BCS353",
+            subject_name: "Web Designing Workshop",
+            teacher: "Mr Devendra Vikram",
+            room: "6F-03",
+            group: "Group 1",
+          },
+          {
+            period: 5,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BCS352",
+            subject_name: "Computer Organisation Architecture Lab",
+            teacher: "Mr Laxman Singh",
+            room: "3F-07",
+            group: "Group 2",
+          },
+        ],
+        THU: [
+          {
+            period: 1,
+            time_start: "09:50",
+            time_end: "10:40",
+            subject_code: "BOE305",
+            subject_name: "Sensor and Instrumentation",
+            teacher: "Mr Prabhat Raghav",
+            room: "2F-BB1",
+          },
+          {
+            period: 2,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS301",
+            subject_name: "Data Structures",
+            teacher: "Mr Krishna Bihari Dubey",
+            room: "2F-BB1",
+          },
+          {
+            period: 3,
+            time_start: "14:10",
+            time_end: "15:00",
+            subject_code: "BCS302",
+            subject_name: "Computer Organisation Architecture",
+            teacher: "Mr Laxman Singh",
+            room: "3F-07",
+          },
+          {
+            period: 4,
+            time_start: "15:00",
+            time_end: "15:50",
+            subject_code: "BCC302",
+            subject_name: "Python Programming",
+            teacher: "Mr. Ankit Kardam",
+            room: "2F-BB1",
+          },
+        ],
+        FRI: [
+          {
+            period: 1,
+            time_start: "09:50",
+            time_end: "10:40",
+            subject_code: "BCS303",
+            subject_name: "Discrete Structures Theory of Logic",
+            teacher: "Ms Preeti Singh",
+            room: "3F-BB2",
+          },
+          {
+            period: 2,
+            time_start: "10:40",
+            time_end: "11:30",
+            subject_code: "BCS302",
+            subject_name: "Computer Organisation Architecture",
+            teacher: "Mr Laxman Singh",
+            room: "2F-BB1",
+          },
+          {
+            period: 3,
+            time_start: "11:30",
+            time_end: "12:20",
+            subject_code: "BVE301",
+            subject_name: "Universal Human Values Professional Ethics",
+            teacher: "Mr Kaushal Gupta",
+            room: "3F-BB2",
+          },
+          {
+            period: 4,
+            time_start: "14:10",
+            time_end: "15:00",
+            subject_code: "BCS303",
+            subject_name: "Discrete Structures Theory of Logic",
+            teacher: "Ms Preeti Singh",
+            room: "3F-BB2",
+          },
+          {
+            period: 5,
+            time_start: "15:00",
+            time_end: "15:50",
+            subject_code: "BCS301",
+            subject_name: "Data Structures",
+            teacher: "Mr Krishna Bihari Dubey",
+            room: "3F-BB2",
+          },
+        ],
+        SAT: [],
+      };
+
+      // ---------- STATE ----------
+      const weekMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      let todayDay = weekMap[new Date().getDay()];
+      if (todayDay === "SUN") todayDay = "MON"; // fallback
+      let currentDayOfWeek = todayDay; // selected in weekly view
+      let editDay = null; // which day currently in edit mode (null when none)
+      let activeView = "today"; // 'today' or 'weekly'
+
+      // ---------- DOM refs ----------
+      const todayBtn = document.getElementById("today-btn");
+      const weeklyBtn = document.getElementById("weekly-btn");
+      const todayView = document.getElementById("today-view");
+      const weeklyView = document.getElementById("weekly-view");
+      const dailyTitle = document.getElementById("daily-title");
+      const dailyScheduleContainer = document.getElementById(
+        "daily-schedule-container"
+      );
+      const dayButtons = document.querySelectorAll(".day-selector button");
+
+      // ---------- helpers ----------
+      function formatTime(time) {
+        const [h, m] = time.split(":").map(Number);
+        const am = h >= 12 ? "PM" : "AM";
+        const hh = h % 12 || 12;
+        return `${hh}:${String(m).padStart(2, "0")} ${am}`;
+      }
+      function getDayFullName(d) {
+        return (
+          {
+            MON: "Monday",
+            TUE: "Tuesday",
+            WED: "Wednesday",
+            THU: "Thursday",
+            FRI: "Friday",
+            SAT: "Saturday",
+          }[d] || d
+        );
+      }
+      function getSubjectColor(code) {
+        switch (code) {
+          case "BCS301":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs301"
+              ) || "#388e3c"
+            );
+          case "BCS302":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs302"
+              ) || "#1976d2"
+            );
+          case "BCS303":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs303"
+              ) || "#c2185b"
+            );
+          case "BOE305":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-boe305"
+              ) || "#fbc02d"
+            );
+          case "BCC302":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcc302"
+              ) || "#4527a0"
+            );
+          case "BVE301":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bve301"
+              ) || "#00796b"
+            );
+          case "BCS351":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs351"
+              ) || "#388e3c"
+            );
+          case "BCS352":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs352"
+              ) || "#1976d2"
+            );
+          case "BCS353":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcs353"
+              ) || "#f57c00"
+            );
+          case "BCC351":
+            return (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--color-bcc351"
+              ) || "#d32f2f"
+            );
+          default:
+            return "#8b5cf6";
+        }
+      }
+
+      // ---------- render a single class card ----------
+      function makeClassCard(day, cls, idx) {
+        const card = document.createElement("div");
+        card.className = "class-card";
+        card.style.borderLeftColor = getSubjectColor(cls.subject_code || "");
+        card.innerHTML = `
+        <div class="time-info">Period ${cls.period}: ${formatTime(
+          cls.time_start
+        )} - ${formatTime(cls.time_end)}</div>
+        <div class="subject-info">${cls.subject_name} <small>(${
+          cls.subject_code
+        })</small></div>
+        <div class="details">
+          <div><strong>Teacher:</strong> ${cls.teacher || "N/A"}</div>
+          <div><strong>Room:</strong> ${cls.room || "N/A"}</div>
+          ${cls.group ? `<div><strong>Group:</strong> ${cls.group}</div>` : ""}
+        </div>
+      `;
+
+        // delete button (visible only when this day is in edit mode)
+        const del = document.createElement("button");
+        del.className = "delete-btn";
+        del.title = "Delete this class";
+        del.innerHTML = "🗑";
+        del.onclick = (e) => {
+          e.stopPropagation();
+          if (!confirm("Delete this class?")) return;
+          deleteClass(day, idx);
+        };
+        if (editDay === day) del.classList.add("visible");
+        card.appendChild(del);
+
+        return card;
+      }
+
+      // ---------- delete a class ----------
+      function deleteClass(day, idx) {
+        // remove the item at idx for that day
+        timetableData[day].splice(idx, 1);
+        // optional: keep period numbers consistent by reassigning sequentially by index or keep original periods.
+        // We'll keep periods as provided but we can reassign sequential numbers to keep UI neat:
+        timetableData[day].forEach((p, i) => (p.period = i + 1));
+        reRender();
+      }
+
+      // ---------- add a class (uses form values) ----------
+      function addClassToDay(day, newObj) {
+        // push then sort by period to keep ordering consistent
+        timetableData[day].push(newObj);
+        timetableData[day].sort((a, b) => (a.period || 0) - (b.period || 0));
+        // reassign period indices to keep neat (optional)
+        timetableData[day].forEach((p, i) => (p.period = i + 1));
+        reRender();
+      }
+
+      // ---------- renders Today view ----------
+      function renderToday() {
+        todayView.innerHTML = "";
+        const title = document.createElement("h3");
+        title.id = "today-title";
+        title.textContent = `${getDayFullName(todayDay)} (Today)`;
+        todayView.appendChild(title);
+
+        const daySchedule = document.createElement("div");
+        if ((timetableData[todayDay] || []).length) {
+          timetableData[todayDay].forEach((cls, idx) => {
+            daySchedule.appendChild(makeClassCard(todayDay, cls, idx));
+          });
+        } else {
+          const empty = document.createElement("div");
+          empty.className = "small-muted";
+          empty.textContent = "No classes today.";
+          daySchedule.appendChild(empty);
+        }
+        todayView.appendChild(daySchedule);
+
+        // edit button for today
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn open-edit";
+        editBtn.textContent =
+          editDay === todayDay
+            ? `Exit Edit ${getDayFullName(todayDay)}`
+            : `Edit ${getDayFullName(todayDay)}`;
+        editBtn.onclick = () => {
+          editDay = editDay === todayDay ? null : todayDay;
+          reRender();
+        };
+        todayView.appendChild(editBtn);
+
+        // edit panel for today (if active)
+        if (editDay === todayDay) {
+          const panel = makeEditPanel(todayDay);
+          todayView.appendChild(panel);
+        }
+      }
+
+      // ---------- renders Weekly selected day ----------
+      function renderWeekly() {
+        // highlight day button
+        dayButtons.forEach((b) => {
+          b.classList.remove("active");
+          if (
+            b.id.split("-")[0].toUpperCase() ===
+            currentDayOfWeek.substring(0, 3).toUpperCase()
+          )
+            b.classList.add("active");
+        });
+
+        dailyTitle.textContent = getDayFullName(currentDayOfWeek);
+        dailyScheduleContainer.innerHTML = "";
+
+        const daySchedule = document.createElement("div");
+        if ((timetableData[currentDayOfWeek] || []).length) {
+          timetableData[currentDayOfWeek].forEach((cls, idx) => {
+            dailyScheduleContainer.appendChild(
+              makeClassCard(currentDayOfWeek, cls, idx)
+            );
+          });
+        } else {
+          const empty = document.createElement("div");
+          empty.className = "small-muted";
+          empty.textContent = "No classes scheduled.";
+          dailyScheduleContainer.appendChild(empty);
+        }
+
+        // edit button for weekly selected day
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn open-edit";
+        editBtn.textContent =
+          editDay === currentDayOfWeek
+            ? `Exit Edit ${getDayFullName(currentDayOfWeek)}`
+            : `Edit ${getDayFullName(currentDayOfWeek)}`;
+        editBtn.onclick = () => {
+          editDay = editDay === currentDayOfWeek ? null : currentDayOfWeek;
+          reRender();
+        };
+        dailyScheduleContainer.appendChild(editBtn);
+
+        // edit panel for selected day (if active)
+        if (editDay === currentDayOfWeek) {
+          const panel = makeEditPanel(currentDayOfWeek);
+          dailyScheduleContainer.appendChild(panel);
+        }
+      }
+
+      // ---------- create edit panel (form) for a day ----------
+      function makeEditPanel(day) {
+        const panel = document.createElement("div");
+        panel.className = "edit-panel";
+
+        // simple instructions
+        const info = document.createElement("div");
+        info.className = "small-muted";
+        info.textContent = `You can add a class below. Use exact HH:MM (24-hour) format for times. To remove an existing class click the trash icon beside it.`;
+        panel.appendChild(info);
+
+        // build form
+        const form = document.createElement("form");
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          // collect values
+          const fd = new FormData(form);
+          const newClass = {
+            period:
+              Number(fd.get("period")) ||
+              (timetableData[day].length > 0
+                ? timetableData[day].length + 1
+                : 1),
+            time_start: fd.get("time_start") || "00:00",
+            time_end: fd.get("time_end") || "00:00",
+            subject_code: fd.get("subject_code") || "N/A",
+            subject_name: fd.get("subject_name") || "New Subject",
+            teacher: fd.get("teacher") || "",
+            room: fd.get("room") || "",
+            group: fd.get("group") || "",
+          };
+          addClassToDay(day, newClass);
+          form.reset();
+        };
+
+        // form inputs
+        const row1 = document.createElement("div");
+        row1.className = "edit-row";
+        row1.innerHTML = `
+        <input name="period" placeholder="Period (number)" />
+        <input name="time_start" placeholder="Start (HH:MM)" />
+        <input name="time_end" placeholder="End (HH:MM)" />
+      `;
+        const row2 = document.createElement("div");
+        row2.className = "edit-row";
+        row2.innerHTML = `
+        <input name="subject_code" placeholder="Subject Code (e.g. BCS301)" />
+        <input name="subject_name" placeholder="Subject Name" />
+        <input name="teacher" placeholder="Teacher" />
+      `;
+        const row3 = document.createElement("div");
+        row3.className = "edit-row";
+        row3.innerHTML = `
+        <input name="room" placeholder="Room" />
+        <input name="group" placeholder="Group (optional)" />
+        <div></div>
+      `;
+        const actions = document.createElement("div");
+        actions.className = "edit-actions";
+        const addBtn = document.createElement("button");
+        addBtn.className = "btn add";
+        addBtn.textContent = "Add Class";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn cancel";
+        cancelBtn.textContent = "Close Edit";
+        addBtn.type = "submit";
+        cancelBtn.type = "button";
+        cancelBtn.onclick = () => {
+          editDay = null;
+          reRender();
+        };
+        actions.appendChild(addBtn);
+        actions.appendChild(cancelBtn);
+
+        form.appendChild(row1);
+        form.appendChild(row2);
+        form.appendChild(row3);
+        form.appendChild(actions);
+        panel.appendChild(form);
+
+        return panel;
+      }
+
+      // ---------- re-render depending on activeView ----------
+      function reRender() {
+        if (activeView === "today") {
+          todayView.style.display = "block";
+          weeklyView.style.display = "none";
+          renderToday();
+        } else {
+          todayView.style.display = "none";
+          weeklyView.style.display = "block";
+          renderWeekly();
+        }
+      }
+
+      // ---------- view toggles ----------
+      todayBtn.onclick = () => {
+        activeView = "today";
+        todayBtn.classList.add("active");
+        weeklyBtn.classList.remove("active");
+        editDay = null;
+        reRender();
+      };
+      weeklyBtn.onclick = () => {
+        activeView = "weekly";
+        weeklyBtn.classList.add("active");
+        todayBtn.classList.remove("active");
+        reRender();
+      };
+
+      // day selector buttons in weekly view: set currentDayOfWeek and render
+      dayButtons.forEach((btn) => {
+        btn.onclick = () => {
+          const id = btn.id.split("-")[0];
+          // NOTE: our keys are MON,TUE... btn id 'mon-btn' -> 'mon' -> uppercase first 3 letters
+          const dayKey =
+            id.toUpperCase().substring(0, 3) === "SAT"
+              ? "SAT"
+              : id.toUpperCase().substring(0, 3);
+          // convert two-letter 'mon' -> 'MON', we expect these buttons named as mon,tue,...
+          // we'll map small values to our keys:
+          const mapping = {
+            mon: "MON",
+            tue: "TUE",
+            wed: "WED",
+            thu: "THU",
+            fri: "FRI",
+            sat: "SAT",
+          };
+          currentDayOfWeek = mapping[id] || "MON";
+          editDay = null;
+          reRender();
+        };
+      });
+
+      // initial render (today)
+      reRender();
+
+      // Expose functions for debugging in console (optional)
+      window._timetableData = timetableData;
+    </script>
+  </body>
+</html>

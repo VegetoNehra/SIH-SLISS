@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOTES AND PYQS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              darkBg: "#0f172a", // background
+              darkCard: "#1e293b", // card container
+              neonPink: "#ec4899",
+              neonPurple: "#8b5cf6",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #0b0c2a;
+      color: #e5e7eb;
+    }
+
+    /* ✅ Logo style */
+    .logo {
+      height: 50px; /* fixed height */
+      width: auto;  /* keep natural aspect ratio */
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    /* ================= NAVBAR ================= */
+    :root {
+      --nav-h: 70px;
+      --accent1: #8b5cf6; /* violet */
+      --accent2: #d946ef; /* pink */
+    }
+
+    .navbar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(3, 8, 23, 0.6);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-text {
+      font-weight: 600;
+      color: #fff;
+      margin-left: 6px;
+      letter-spacing: 1px;
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links a {
+      display: inline-block;
+      padding: 8px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+      letter-spacing: 1px;
+    }
+
+    .nav-links a:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+      filter: brightness(1.05);
+    }
+
+    .nav-links a.active {
+      filter: brightness(1.2);
+      box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+    }
+
+    footer {
+      background-color: #161735;
+    }
+  </style>
+</head>
+
+<body class="text-gray-200">
+  <div class="min-h-screen flex flex-col">
+
+    <!-- 🔹 Header -->
+    <header class="navbar">
+      <div class="nav-left">
+        <img src="logo.png" alt="SLISS Logo" class="logo" />
+        <span class="brand-text">SLISS</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About</a>
+      </nav>
+    </header>
+
+    <div
+      class="main-content-container min-h-screen flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-darkCard rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden"
+      >
+        <header
+          class="bg-gradient-to-r from-neonPurple to-neonPink text-white p-6 md:p-8 flex items-center space-x-4 rounded-t-2xl"
+        >
+          <svg
+            class="h-10 w-10 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 14v5a2 2 0 002 2h4a2 2 0 002-2v-5M12 14L3 9M12 14V3"
+            />
+          </svg>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
+            NOTES AND PYQS
+          </h1>
+        </header>
+
+        <div
+          class="bg-darkCard text-white p-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-700"
+        >
+          <div class="flex space-x-4 mb-4 md:mb-0">
+            <button
+              id="notes-nav-btn"
+              class="px-4 py-2 rounded-full font-medium transition-colors duration-200 bg-neonPurple hover:bg-neonPink"
+            >
+              Notes
+            </button>
+            <button
+              id="pyq-nav-btn"
+              class="px-4 py-2 rounded-full font-medium transition-colors duration-200 bg-darkCard hover:bg-neonPink border border-gray-600"
+            >
+              PYQ
+            </button>
+          </div>
+          <div class="flex items-center w-full md:w-auto">
+            <label for="subject-select" class="font-medium text-gray-300 mr-2"
+              >Subject:</label
+            >
+            <select
+              id="subject-select"
+              class="flex-1 p-2 rounded-lg border-gray-600 focus:border-neonPink focus:ring-neonPink bg-darkBg text-gray-200"
+            >
+              <option value="Sensor">Sensor</option>
+              <option value="DSTL">DSTL</option>
+              <option value="COA">COA</option>
+              <option value="UHV">UHV</option>
+              <option value="Python">Python</option>
+              <option value="DS">DS</option>
+            </select>
+          </div>
+        </div>
+
+        <main id="notes-page" class="p-6 md:p-8 bg-darkBg rounded-b-2xl">
+          <h2
+            class="text-2xl font-semibold text-neonPink mb-4 flex items-center space-x-2"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span>Unit-wise Notes</span>
+          </h2>
+          <ul id="notes-list" class="space-y-4"></ul>
+        </main>
+
+        <main id="pyq-page" class="p-6 md:p-8 bg-darkBg rounded-b-2xl hidden">
+          <h2
+            class="text-2xl font-semibold text-neonPink mb-4 flex items-center space-x-2"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+              />
+            </svg>
+            <span>Previous Year Questions (PYQ)</span>
+          </h2>
+          <div class="mb-6">
+            <label
+              for="year-select"
+              class="block font-medium text-gray-400 mb-2"
+              >Select Year:</label
+            >
+            <select
+              id="year-select"
+              class="w-full p-2 rounded-lg border-gray-600 focus:border-neonPink focus:ring-neonPink bg-darkCard text-gray-200"
+            >
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </div>
+          <ul id="pyq-list" class="space-y-4"></ul>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // ... (puraana script code yahan waisa hi rahega, usmein koi badlav nahi) ...
+      const subjectSelect = document.getElementById("subject-select");
+      const notesList = document.getElementById("notes-list");
+      const notesBtn = document.getElementById("notes-nav-btn");
+      const pyqBtn = document.getElementById("pyq-nav-btn");
+      const notesPage = document.getElementById("notes-page");
+      const pyqPage = document.getElementById("pyq-page");
+      const pyqList = document.getElementById("pyq-list");
+      const yearSelect = document.getElementById("year-select");
+
+      // Notes data (replace links with your actual PDF paths)
+      const notesData = {
+        Sensor: [
+          { title: "Unit 1: Sensor Basics", link: "notes/sensor/unit1.pdf" },
+          { title: "Unit 2: Sensor Types", link: "notes/sensor/unit2.pdf" },
+          { title: "Unit 3: Sensor Circuits", link: "notes/sensor/unit3.pdf" },
+          { title: "Unit 4: Applications", link: "notes/sensor/unit4.pdf" },
+          { title: "Unit 5: Advanced Topics", link: "notes/sensor/unit5.pdf" },
+        ],
+        DSTL: [
+          { title: "Unit 1: Number Systems", link: "notes/dstl/unit1.pdf" },
+          { title: "Unit 2: Logic Gates", link: "notes/dstl/unit2.pdf" },
+          { title: "Unit 3: K-Maps", link: "notes/dstl/unit3.pdf" },
+          { title: "Unit 4: Flip-Flops", link: "notes/dstl/unit4.pdf" },
+          {
+            title: "Unit 5: Counters & Registers",
+            link: "notes/dstl/unit5.pdf",
+          },
+        ],
+      };
+
+      // PYQ data
+      const pyqData = {
+        DSTL: {
+          2023: [
+            { title: "DSTL PYQ 2023 Set A", link: "pyq/dstl/2023_setA.pdf" },
+            { title: "DSTL PYQ 2023 Set B", link: "pyq/dstl/2023_setB.pdf" },
+          ],
+          2022: [{ title: "DSTL PYQ 2022", link: "pyq/dstl/2022.pdf" }],
+        },
+        Sensor: {
+          2023: [{ title: "Sensor PYQ 2023", link: "pyq/sensor/2023.pdf" }],
+        },
+      };
+
+      // Render Notes
+      function renderNotes(subject) {
+        notesList.innerHTML = "";
+        if (notesData[subject]) {
+          notesData[subject].forEach((unit) => {
+            const li = document.createElement("li");
+            li.className =
+              "bg-darkCard p-4 rounded-lg border border-gray-700 hover:border-neonPink transition duration-300";
+
+            const a = document.createElement("a");
+            a.href = unit.link;
+            a.download = "";
+            a.className = "block text-neonPink font-semibold hover:text-white";
+            a.textContent = `${unit.title} - Download`;
+
+            li.appendChild(a);
+            notesList.appendChild(li);
+          });
+        } else {
+          notesList.innerHTML = `<p class="text-gray-400">No notes available for this subject.</p>`;
+        }
+      }
+
+      // Render PYQs
+      function renderPyqs(subject, year) {
+        pyqList.innerHTML = "";
+        if (pyqData[subject] && pyqData[subject][year]) {
+          pyqData[subject][year].forEach((q) => {
+            const li = document.createElement("li");
+            li.className =
+              "bg-darkCard p-4 rounded-lg border border-gray-700 hover:border-neonPink transition duration-300";
+
+            const a = document.createElement("a");
+            a.href = q.link;
+            a.download = "";
+            a.className = "block text-neonPink font-semibold hover:text-white";
+            a.textContent = q.title;
+
+            li.appendChild(a);
+            pyqList.appendChild(li);
+          });
+        } else {
+          pyqList.innerHTML = `<p class="text-gray-400">No PYQs available for this selection.</p>`;
+        }
+      }
+
+      // Navigation
+      notesBtn.addEventListener("click", () => {
+        notesPage.classList.remove("hidden");
+        pyqPage.classList.add("hidden");
+        notesBtn.classList.add("bg-neonPurple");
+        pyqBtn.classList.remove("bg-neonPurple");
+      });
+
+      pyqBtn.addEventListener("click", () => {
+        pyqPage.classList.remove("hidden");
+        notesPage.classList.add("hidden");
+        pyqBtn.classList.add("bg-neonPurple");
+        notesBtn.classList.remove("bg-neonPurple");
+        renderPyqs(subjectSelect.value, yearSelect.value);
+      });
+
+      // Subject & Year change events
+      subjectSelect.addEventListener("change", () => {
+        renderNotes(subjectSelect.value);
+        renderPyqs(subjectSelect.value, yearSelect.value);
+      });
+      yearSelect.addEventListener("change", () => {
+        renderPyqs(subjectSelect.value, yearSelect.value);
+      });
+
+      // Default load
+      renderNotes("Sensor");
+      renderPyqs("DSTL", "2023");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Fees Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #0b0c2a;
+      color: #e5e7eb;
+    }
+
+    /* ✅ Logo style */
+    .logo {
+      height: 50px;
+      width: auto;
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+    .logo:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    /* ✅ Navbar */
+    :root {
+      --nav-h: 70px;
+      --accent1: #8b5cf6;
+      --accent2: #d946ef;
+    }
+    .navbar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(3, 8, 23, 0.6);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-text {
+      font-weight: 600;
+      color: #fff;
+      margin-left: 6px;
+      letter-spacing: 1px;
+      font-size: 20px;
+      opacity: 0.95;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-links a {
+      display: inline-block;
+      padding: 8px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+      letter-spacing: 1px;
+    }
+    .nav-links a:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+      filter: brightness(1.05);
+    }
+    .nav-links a.active {
+      filter: brightness(1.2);
+      box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+    }
+
+    footer {
+      background-color: #161735;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 font-sans antialiased text-gray-200">
+
+  <!-- 🔹 Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- 🔹 Main Container -->
+  <div class="min-h-screen p-6 flex flex-col items-center">
+    <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden">
+      
+      <!-- Header -->
+      <header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-2xl flex justify-between items-center">
+        <h1 class="text-2xl md:text-3xl font-bold">Fees Payment</h1>
+        <select id="year-select" class="p-2 rounded-lg text-gray-800">
+          <option value="2024">Session 2024</option>
+          <option value="2025">Session 2025</option>
+          <option value="2026">Session 2026</option>
+          <option value="2027">Session 2027</option>
+          <option value="2028">Session 2028</option>
+        </select>
+      </header>
+
+      <!-- Summary -->
+      <section id="fee-summary-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-gray-700 transition-opacity duration-500 opacity-100"></section>
+
+      <!-- Fees Sections -->
+      <section class="p-6 space-y-6 transition-opacity duration-500 opacity-100" id="fee-sections">
+        <div>
+          <h2 class="text-xl font-semibold mb-3 text-red-400">Due Fees (<span id="due-count">0</span>)</h2>
+          <div id="due-fees-container" class="grid gap-4"></div>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold mb-3 text-yellow-400">Upcoming Fees (<span id="upcoming-count">0</span>)</h2>
+          <div id="upcoming-fees-container" class="grid gap-4"></div>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold mb-3 text-green-400">Paid Fees (<span id="paid-count">0</span>)</h2>
+          <div id="paid-fees-container" class="grid gap-4"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Fee Data including Hostel Fee ₹60,000
+    const feeData = {
+      "2024": [
+        { name: "Tuition Fee", amount: 100000, status: "paid" },
+        { name: "Examination Fee", amount: 7000, status: "paid" },
+        { name: "Hostel Fee", amount: 60000, status: "paid" }
+      ],
+      "2025": [
+        { name: "Tuition Fee", amount: 100000, status: "paid" },
+        { name: "Examination Fee", amount: 7000, status: "due" },
+        { name: "Hostel Fee", amount: 60000, status: "paid" }
+      ],
+      "2026": [
+        { name: "Tuition Fee", amount: 100000, status: "due" },
+        { name: "Examination Fee", amount: 7000, status: "upcoming" },
+        { name: "Hostel Fee", amount: 60000, status: "due" }
+      ],
+      "2027": [
+        { name: "Tuition Fee", amount: 100000, status: "due" },
+        { name: "Examination Fee", amount: 7000, status: "upcoming" },
+        { name: "Hostel Fee", amount: 60000, status: "due" }
+      ],
+      "2028": [
+        { name: "Tuition Fee", amount: 100000, status: "due" },
+        { name: "Examination Fee", amount: 7000, status: "upcoming" },
+        { name: "Hostel Fee", amount: 60000, status: "due" }
+      ]
+    };
+
+    const containers = {
+      due: document.getElementById("due-fees-container"),
+      upcoming: document.getElementById("upcoming-fees-container"),
+      paid: document.getElementById("paid-fees-container")
+    };
+
+    const counts = {
+      due: document.getElementById("due-count"),
+      upcoming: document.getElementById("upcoming-count"),
+      paid: document.getElementById("paid-count")
+    };
+
+    const summaryContainer = document.getElementById("fee-summary-container");
+    const feeSections = document.getElementById("fee-sections");
+
+    function createFeeCard(fee) {
+      return `
+        <div class="p-4 bg-gray-700 border border-gray-600 rounded-lg shadow-sm hover:shadow-md transition">
+          <h3 class="font-semibold text-lg">${fee.name}</h3>
+          <p class="text-gray-400">₹${fee.amount}</p>
+          <span class="text-sm px-2 py-1 rounded-full ${
+            fee.status === "due" ? "bg-red-900 text-red-400" :
+            fee.status === "upcoming" ? "bg-yellow-900 text-yellow-400" :
+            "bg-green-900 text-green-400"
+          }">${fee.status.toUpperCase()}</span>
+        </div>
+      `;
+    }
+
+    function createFeeSummaryCard(label, amount, color) {
+      return `
+        <div class="p-6 rounded-xl shadow bg-${color}-900 text-${color}-400">
+          <h3 class="text-lg font-medium">${label}</h3>
+          <p class="text-2xl font-bold mt-2">₹${amount}</p>
+        </div>
+      `;
+    }
+
+    function renderFees(year) {
+      const fees = feeData[year] || [];
+      Object.values(containers).forEach(c => c.innerHTML = "");
+
+      const dueFees = fees.filter(f => f.status === "due");
+      const upcomingFees = fees.filter(f => f.status === "upcoming");
+      const paidFees = fees.filter(f => f.status === "paid");
+
+      const totalFees = fees.reduce((sum, f) => sum + f.amount, 0);
+      const totalPaid = paidFees.reduce((sum, f) => sum + f.amount, 0);
+      const remainingFees = totalFees - totalPaid;
+
+      summaryContainer.innerHTML =
+        createFeeSummaryCard("Total Fees", totalFees, "blue") +
+        createFeeSummaryCard("Submitted Fees", totalPaid, "green") +
+        createFeeSummaryCard("Remaining Fees", remainingFees, "red");
+
+      dueFees.forEach(f => containers.due.innerHTML += createFeeCard(f));
+      upcomingFees.forEach(f => containers.upcoming.innerHTML += createFeeCard(f));
+      paidFees.forEach(f => containers.paid.innerHTML += createFeeCard(f));
+
+      counts.due.textContent = dueFees.length;
+      counts.upcoming.textContent = upcomingFees.length;
+      counts.paid.textContent = paidFees.length;
+    }
+
+    function changeYearAnimated(year) {
+      summaryContainer.classList.add("opacity-0");
+      feeSections.classList.add("opacity-0");
+
+      setTimeout(() => {
+        renderFees(year);
+        summaryContainer.classList.remove("opacity-0");
+        feeSections.classList.remove("opacity-0");
+      }, 300);
+    }
+
+    document.getElementById("year-select").addEventListener("change", e => changeYearAnimated(e.target.value));
+    window.addEventListener("DOMContentLoaded", () => renderFees("2024"));
+  </script>
+</body>
+</html>

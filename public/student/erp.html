@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLISS - ERP Form</title>
+  <style>
+    body {
+      background: #0e0e1a;
+      color: white;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .container {
+      max-width: 650px;
+      margin: 50px auto;
+      padding: 30px;
+      background: #1e1e2f;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+     h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 32px;
+      background: linear-gradient(to right, #8b5cf6, #d946ef);
+
+      /* Standard property */
+      background-clip: text;
+
+      /* Vendor prefixes for compatibility */
+     -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+     color: transparent; /* fallback for non-WebKit browsers */
+   }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a40;
+      color: white;
+      font-size: 16px;
+    }
+    input:focus, select:focus {
+      outline: 2px solid #8b5cf6;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 20px;
+      background: linear-gradient(90deg, #8b5cf6, #d946ef);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+    #profilePreview {
+      display: none;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #8b5cf6;
+      margin: 10px auto 20px;
+    }
+    #successMessage {
+      text-align: center;
+      color: #4ade80;
+      font-weight: bold;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form id="erpForm" enctype="multipart/form-data">
+      <h2>Application Form</h2>
+      <label>Student Name:</label><input type="text" id="name" required />
+      <label>DOB:</label><input type="date" id="dob" required />
+      <label>Gender:</label>
+      <select id="gender" required>
+        <option value="" disabled selected hidden>Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Others">Others</option>
+      </select>
+      <label>Contact:</label><input type="text" id="contact" required />
+      <label>Category:</label>
+      <select id="category" required>
+        <option value="" disabled selected hidden>Select</option>
+        <option value="General">General</option>
+        <option value="OBC">OBC</option>
+        <option value="SC">SC</option>
+        <option value="ST">ST</option>
+      </select>
+      <label>Address:</label><input type="text" id="address" required />
+      <label>Parent's Name:</label><input type="text" id="parentName" required />
+      <label>Parent's Contact:</label><input type="text" id="parentContact" required />
+      <label>Profile Photo:</label><input type="file" id="profilePhoto" accept="image/*" />
+      <img id="profilePreview" />
+      <label>Documents:</label><input type="file" id="docs" />
+      <button class="btn" type="submit">Submit</button>
+    </form>
+    <div id="successMessage">ERP submitted successfully!</div>
+  </div>
+
+  <script>
+    // Get userid from localStorage
+    const userid = localStorage.getItem("userid");
+    if(!userid){
+      alert("User not logged in. Redirecting to index...");
+      window.location.href = "index.html";
+    }
+
+    const profilePhotoInput = document.getElementById("profilePhoto");
+    const profilePreview = document.getElementById("profilePreview");
+    const successMessage = document.getElementById("successMessage");
+
+    // Preview profile photo
+    profilePhotoInput.addEventListener("change", () => {
+      const file = profilePhotoInput.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = () => {
+          profilePreview.src = reader.result;
+          profilePreview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        profilePreview.src = "";
+        profilePreview.style.display = "none";
+      }
+    });
+
+    // Handle form submission
+    document.getElementById("erpForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append("userid", userid);
+      formData.append("name", document.getElementById("name").value);
+      formData.append("dob", document.getElementById("dob").value);
+      formData.append("gender", document.getElementById("gender").value);
+      formData.append("contact", document.getElementById("contact").value);
+      formData.append("category", document.getElementById("category").value);
+      formData.append("address", document.getElementById("address").value);
+      formData.append("parent_name", document.getElementById("parentName").value);
+      formData.append("parent_contact", document.getElementById("parentContact").value);
+      if(profilePhotoInput.files[0]) formData.append("profile_photo", profilePhotoInput.files[0]);
+      const docsInput = document.getElementById("docs");
+      if(docsInput.files[0]) formData.append("documents", docsInput.files[0]);
+
+      try {
+        const res = await fetch("/api/students", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        console.log("Server response:", data);
+
+        if(res.ok){
+          successMessage.style.display = "block";
+          document.getElementById("erpForm").reset();
+          profilePreview.style.display = "none";
+          window.location.href = "submit.html";
+        } else {
+          alert(data.message || "Submission failed");
+        }
+      } catch(err){
+        console.error(err);
+        alert("Server error. Try again.");
+      }
+    });
+  </script>
+</body>
+</html>

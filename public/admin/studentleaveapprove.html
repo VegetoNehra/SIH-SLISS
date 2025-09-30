@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Teacher Leave Approval</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #1e1e2e; color: white; }
+    .leave-card { transition: transform 0.2s; }
+    .leave-card:hover { transform: translateY(-5px); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+  <div class="bg-gradient-to-br from-[#1b1c34] to-[#121122] rounded-xl shadow-lg p-8 w-full max-w-5xl mt-12">
+    <h1 class="text-3xl font-bold text-center mb-8">Teacher Leave Approval Portal</h1>
+
+    <!-- Tabs -->
+    <div class="flex justify-center mb-6 space-x-4">
+      <button onclick="showTab('pending')" class="tab-btn bg-purple-600 px-4 py-2 rounded text-white font-semibold">Pending</button>
+      <button onclick="showTab('approved')" class="tab-btn bg-green-600 px-4 py-2 rounded text-white font-semibold">Approved</button>
+      <button onclick="showTab('declined')" class="tab-btn bg-red-600 px-4 py-2 rounded text-white font-semibold">Declined</button>
+    </div>
+
+    <!-- Sections -->
+    <div id="pendingRequests" class="space-y-6"></div>
+    <div id="approvedRequests" class="space-y-6 hidden"></div>
+    <div id="declinedRequests" class="space-y-6 hidden"></div>
+  </div>
+
+  <script>
+    const pendingDiv = document.getElementById("pendingRequests");
+    const approvedDiv = document.getElementById("approvedRequests");
+    const declinedDiv = document.getElementById("declinedRequests");
+
+    function showTab(tab) {
+      pendingDiv.classList.add("hidden");
+      approvedDiv.classList.add("hidden");
+      declinedDiv.classList.add("hidden");
+
+      if (tab === "pending") pendingDiv.classList.remove("hidden");
+      if (tab === "approved") approvedDiv.classList.remove("hidden");
+      if (tab === "declined") declinedDiv.classList.remove("hidden");
+    }
+
+    async function fetchLeaves() {
+      try {
+        const res = await fetch("/api/leaves");
+        if (!res.ok) throw new Error("Failed to fetch leaves");
+        const leaves = await res.json();
+        renderRequests(leaves);
+      } catch (err) {
+        console.error(err);
+        pendingDiv.innerHTML = "<p class='text-center text-red-400'>⚠️ Failed to load leave requests.</p>";
+      }
+    }
+
+    function renderRequests(leaves) {
+      pendingDiv.innerHTML = "";
+      approvedDiv.innerHTML = "";
+      declinedDiv.innerHTML = "";
+
+      const sections = {
+        pending: pendingDiv,
+        approved: approvedDiv,
+        declined: declinedDiv
+      };
+
+      const filtered = {
+        pending: leaves.filter(l => l.status === "pending"),
+        approved: leaves.filter(l => l.status === "approved"),
+        declined: leaves.filter(l => l.status === "declined"),
+      };
+
+      for (const status in filtered) {
+        if (filtered[status].length === 0) {
+          sections[status].innerHTML = `<p class="text-center text-gray-400">No ${status} leave requests.</p>`;
+          continue;
+        }
+
+        filtered[status].forEach(request => {
+          const card = document.createElement("div");
+          card.className =
+            "leave-card bg-[#2a2c4a] p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center";
+
+          card.innerHTML = `
+            <div class="flex-1 mb-4 md:mb-0">
+              <h2 class="text-xl font-semibold">${request.name}</h2>
+              <p class="text-gray-200">UserID: ${request.userid}</p>
+              <p class="text-sm mt-2"><span class="font-medium">Type:</span> ${request.leave_type}</p>
+              <p class="text-sm"><span class="font-medium">Dates:</span> ${request.from_date} → ${request.to_date}</p>
+              <p class="text-sm mt-2 italic text-gray-300">Reason: ${request.reason}</p>
+              <p class="mt-2"><strong>Status:</strong> 
+                <span class="${
+                  status === "approved" ? "text-green-400" : status === "declined" ? "text-red-400" : "text-yellow-400"
+                } font-semibold">${request.status}</span>
+              </p>
+            </div>
+          `;
+
+          if (status === "pending") {
+            const actions = document.createElement("div");
+            actions.className = "flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4";
+            actions.innerHTML = `
+              <button onclick="updateLeave(${request.id}, 'approved')" class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition font-semibold">Approve</button>
+              <button onclick="updateLeave(${request.id}, 'declined')" class="px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-semibold">Decline</button>
+            `;
+            card.appendChild(actions);
+          }
+
+          sections[status].appendChild(card);
+        });
+      }
+    }
+
+    async function updateLeave(id, status) {
+      try {
+        const res = await fetch(`/api/leaves/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        });
+
+        if (res.ok) {
+          alert(`✅ Leave has been ${status}.`);
+          fetchLeaves();
+        } else {
+          const err = await res.json();
+          alert("⚠️ " + (err.message || "Failed to update leave"));
+        }
+      } catch (err) {
+        console.error(err);
+        alert("⚠️ Network error while updating leave.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchLeaves();
+      showTab("pending");
+    });
+  </script>
+</body>
+</html>

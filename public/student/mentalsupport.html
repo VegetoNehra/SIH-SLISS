@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mental Health Support - SLISS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "Inter", sans-serif; background-color: #0b0c2a; color: #e5e7eb; margin: 0; }
+    .logo { height: 50px; width: auto; display: block; transition: transform 0.3s ease, filter 0.3s ease; cursor: pointer; }
+    .logo:hover { transform: scale(1.1); filter: brightness(1.2); }
+    :root { --nav-h: 70px; --accent1: #8b5cf6; --accent2: #d946ef; }
+    .navbar { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+              background: rgba(3, 8, 23, 0.6); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(255,255,255,0.05);
+              position: sticky; top: 0; z-index: 1000; }
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .brand-text { font-weight: 600; color: #fff; font-size: 20px; letter-spacing: 1px; }
+    .nav-links { display: flex; align-items: center; gap: 12px; }
+    .nav-links a { padding: 8px 28px; border-radius: 30px; text-decoration: none; color: #fff; font-weight: 600; font-size: 15px;
+                   background: linear-gradient(90deg, var(--accent1), var(--accent2));
+                   box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+                   transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s; }
+    .nav-links a:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28); filter: brightness(1.05); }
+    .nav-links a.active { filter: brightness(1.2); box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45); }
+    .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+    .note { font-size: 14px; color: #b5b5b5; margin-bottom: 15px; }
+    .emergency { font-size: 15px; color: #ff6b6b; font-weight: 600; margin-bottom: 20px;
+                 background: rgba(255, 107, 107, 0.1); padding: 10px; border-radius: 10px; border: 1px solid #ff6b6b; }
+    .emergency a { color: #ff6b6b; text-decoration: none; font-weight: bold; }
+    .emergency a:hover { text-decoration: underline; }
+    textarea { width: 100%; min-height: 180px; background: #2a2a3d; color: #fff; border: 2px solid #444;
+               border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 15px; font-family: 'Poppins', sans-serif; resize: vertical;
+               transition: 0.3s; }
+    textarea:focus { outline: none; border-color: #2575fc; box-shadow: 0 0 10px rgba(37,117,252,0.5); }
+    button { width: 100%; padding: 14px; border: none; border-radius: 10px;
+             background: linear-gradient(to right, #6a11cb, #2575fc); color: white; font-size: 16px; font-weight: 500; cursor: pointer;
+             transition: 0.3s ease; }
+    button:hover { opacity: 0.9; transform: scale(1.02); }
+    .success-message { display: none; margin-top: 15px; color: #4caf50; font-weight: 600; }
+    .error-message { display: none; margin-top: 15px; color: #ff6b6b; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header> 
+
+  <!-- 🔹 Complaint Form -->
+  <div class="container">
+    <h2>Mental Health Support</h2>
+    <p class="note">Submit your complaint anonymously. Your identity will not be recorded.</p>
+    
+    <!-- Emergency Contact with Click-to-Call -->
+    <p class="emergency">
+      🚨 For urgent help, contact Us: <br>
+      📞 <a href="tel:+916390754559">+91-63********</a>
+    </p>
+
+    <form id="complaintForm">
+      <textarea id="complaint" placeholder="Write your complaint or concern here..." required></textarea>
+      <button type="submit">Submit Anonymously</button>
+      <p class="success-message" id="successMsg">✅ Submitted Successfully!</p>
+      <p class="error-message" id="errorMsg">❌ Something went wrong. Try again.</p>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = "/api/support"; // ✅ works both locally & on Render
+
+    document.getElementById("complaintForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const complaintText = document.getElementById("complaint").value;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ complaint: complaintText })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById("successMsg").style.display = "block";
+          document.getElementById("errorMsg").style.display = "none";
+          this.reset();
+        } else {
+          document.getElementById("successMsg").style.display = "none";
+          document.getElementById("errorMsg").textContent = "❌ " + (data.message || "Submission failed.");
+          document.getElementById("errorMsg").style.display = "block";
+        }
+      } catch (err) {
+        document.getElementById("successMsg").style.display = "none";
+        document.getElementById("errorMsg").textContent = "❌ Server error. Try again.";
+        document.getElementById("errorMsg").style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>

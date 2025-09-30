@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hostel Management - SLISS</title>
+    <style>
+      
+  body {
+        font-family: "Inter", sans-serif;
+        background-color: #0b0c2a;
+        color: #e5e7eb;
+      }
+      /* ✅ Logo style */
+.logo {
+  height: 50px; /* fixed height */
+  width: auto;  /* keep natural aspect ratio */
+  display: block;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+
+.logo:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+      
+/* ================= NAVBAR ================= */
+      :root {
+        --nav-h: 70px;
+        --accent1: #8b5cf6; /* violet */
+        --accent2: #d946ef; /* pink */
+      }
+
+      .navbar {
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background: rgba(3, 8, 23, 0.6);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-text {
+        font-weight: 600;
+        color: #fff;
+        margin-left: 6px;
+        letter-spacing: 1px;
+        font-size: 20px;
+        opacity: 0.95;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-links a {
+        display: inline-block;
+        padding: 8px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        background: linear-gradient(90deg, var(--accent1), var(--accent2));
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+        transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+        letter-spacing: 1px;
+      }
+
+      .nav-links a:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+        filter: brightness(1.05);
+      }
+
+      .nav-links a.active {
+        filter: brightness(1.2);
+        box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+      }
+      footer {
+        background-color: #161735;
+      }
+      .card {
+        background: #141428;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+        animation: fadeIn 1s ease-in-out;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .card h1 {
+        font-size: 26px;
+        margin-bottom: 15px;
+        color: #c084fc;
+      }
+
+      .alert {
+        background: #1e1e2e;
+        color: #d946ef;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        border: 1px solid #8b5cf6;
+      }
+
+      .toggle-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .toggle-btn {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #333344;
+        border-radius: 10px;
+        background: #1e1e2e;
+        color: #ccc;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .toggle-btn.active {
+        background: linear-gradient(90deg, #8b5cf6, #d946ef);
+        color: white;
+        border: none;
+      }
+
+      .rooms {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .room {
+        padding: 12px;
+        text-align: center;
+        border-radius: 12px;
+        border: 1px solid #333344;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #1e1e2e;
+        color: white;
+        white-space: pre-line;
+        font-size: 14px;
+      }
+
+      .room.available {
+        background: #10b981; /* Green for available */
+        border: 1px solid #10b981;
+        color: white;
+      }
+
+      .room.selected {
+        background: #8b5cf6;
+        color: white;
+        border-color: #d946ef;
+      }
+
+      .book-btn {
+        margin-top: 20px;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(90deg, #8b5cf6, #d946ef);
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .book-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+
+      .note {
+        font-size: 14px;
+        color: #bbb;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body><!-- 🔥 Fixed Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+    <div class="card">
+      <h1>Hostel Management</h1>
+      <div class="alert">
+        <strong>No Room Allotted</strong><br />
+        You currently do not have a hostel room allotted. Please select one
+        below.
+      </div>
+      <div id="totalSeats" class="note"></div>
+
+      <div class="toggle-buttons">
+        <button id="boysBtn" class="toggle-btn active">Boys Hostel</button>
+        <button id="girlsBtn" class="toggle-btn">Girls Hostel</button>
+      </div>
+
+      <h3>Hostel Application</h3>
+      <p class="note">
+        (Single, Double, Triple rooms available in AC & Non-AC)
+      </p>
+
+      <div class="rooms" id="roomList"></div>
+      <button class="book-btn" id="bookBtn">Book Selected Room</button>
+    </div>
+
+  <script>
+const roomList = document.getElementById("roomList");
+const boysBtn = document.getElementById("boysBtn");
+const girlsBtn = document.getElementById("girlsBtn");
+const bookBtn = document.getElementById("bookBtn");
+const totalSeatsDiv = document.getElementById("totalSeats");
+
+let selectedRoom = null;
+let currentHostel = "boys";
+let hostelData = [];
+
+// ===========================
+// Fetch rooms from server
+// ===========================
+async function fetchRooms(hostel) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/rooms/${hostel}`);
+    hostelData = await res.json();
+    if (!Array.isArray(hostelData) || hostelData.length === 0) {
+      roomList.innerHTML = "<p style='color:#bbb;'>No rooms available.</p>";
+      totalSeatsDiv.textContent = "";
+      return;
+    }
+    renderRooms();
+  } catch (err) {
+    console.error("Error fetching rooms:", err);
+    roomList.innerHTML = "<p style='color:#ff6b6b;'>Failed to load rooms.</p>";
+  }
+}
+
+// ===========================
+// Render rooms to DOM
+// ===========================
+function renderRooms() {
+  roomList.innerHTML = "";
+  selectedRoom = null;
+
+  hostelData.forEach((room) => {
+    const div = document.createElement("div");
+    div.className = `room ${room.available ? "available" : ""}`;
+    div.textContent = `${room.room_id}\n(${room.type})\nSeats Vacant: ${room.seats}`;
+    div.onclick = async () => {
+      if (!room.available) return;
+      document.querySelectorAll(".room").forEach((r) => r.classList.remove("selected"));
+      div.classList.add("selected");
+      selectedRoom = room;
+    };
+    roomList.appendChild(div);
+  });
+
+  updateTotalSeats();
+}
+
+// ===========================
+// Update total seats
+// ===========================
+function updateTotalSeats() {
+  const totalSeats = hostelData.reduce((sum, room) => sum + (room.available ? room.seats : 0), 0);
+  totalSeatsDiv.textContent = `Total Seats Available in ${currentHostel.charAt(0).toUpperCase() + currentHostel.slice(1)} Hostel: ${totalSeats}`;
+}
+
+// ===========================
+// Toggle hostel buttons
+// ===========================
+boysBtn.onclick = () => {
+  currentHostel = "boys";
+  boysBtn.classList.add("active");
+  girlsBtn.classList.remove("active");
+  fetchRooms("boys");
+};
+
+girlsBtn.onclick = () => {
+  currentHostel = "girls";
+  girlsBtn.classList.add("active");
+  boysBtn.classList.remove("active");
+  fetchRooms("girls");
+};
+
+// ===========================
+// Book selected room
+// ===========================
+bookBtn.onclick = async () => {
+  if (!selectedRoom) {
+    alert("Please select a room to book.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/rooms/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ room_id: selectedRoom.room_id }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      fetchRooms(currentHostel); // refresh room list
+    } else {
+      alert(data.message || "Failed to book room");
+    }
+  } catch (err) {
+    console.error("Error booking room:", err);
+    alert("Error booking room");
+  }
+};
+
+// ===========================
+// Initial load
+// ===========================
+fetchRooms("boys");
+</script>
+
+  </body>
+</html>

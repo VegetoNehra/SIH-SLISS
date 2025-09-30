@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLISS - Attendance</title>
+    <style>
+      
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #0b0c2a;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ Centralized container */
+.container {
+  max-width: 1100px;   /* reduced size (before it looked full-width) */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ✅ Logo style */
+.logo {
+  height: 45px; /* slightly smaller */
+  width: auto;
+  display: block;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+.logo:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+/* ================= NAVBAR ================= */
+:root {
+  --nav-h: 70px;
+  --accent1: #8b5cf6; /* violet */
+  --accent2: #d946ef; /* pink */
+}
+
+.navbar {
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px; /* reduced padding */
+  background: rgba(3, 8, 23, 0.6);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-text {
+  font-weight: 600;
+  color: #fff;
+  margin-left: 5px;
+  letter-spacing: 1px;
+  font-size: 18px; /* reduced */
+  opacity: 0.95;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-links a {
+  display: inline-block;
+  padding: 7px 22px; /* reduced button size */
+  border-radius: 25px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+  letter-spacing: 1px;
+}
+
+.nav-links a:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  filter: brightness(1.05);
+}
+
+.nav-links a.active {
+  filter: brightness(1.2);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+footer {
+  background-color: #161735;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Student Info */
+.student-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px; /* smaller gap */
+  margin-bottom: 20px;
+}
+
+.student-info-item {
+  background: #1a1a40;
+  border-radius: 12px;
+  padding: 15px; /* reduced */
+  text-align: center;
+}
+
+.student-info-item h3 {
+  margin: 0;
+  font-size: 14px; /* reduced */
+  color: #bbb;
+}
+
+.student-info-item p {
+  margin: 4px 0 0;
+  font-size: 16px; /* reduced */
+  font-weight: bold;
+}
+
+/* Overview Card */
+.card {
+  background: #1a1a40;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 900px; /* fixed width */
+  margin: 0 auto;
+}
+
+/* Animated Bar Container */
+.attendance-container {
+  width: 100%;
+  height: 20px; /* smaller */
+  background: #333;
+  border-radius: 40px;
+  overflow: hidden;
+  margin: 15px auto;
+  border: 1px solid #444;
+}
+
+/* Filling Bar */
+.attendance-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  border-radius: 40px;
+  transition: width 2s ease-out;
+}
+
+/* Buttons */
+.btn-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.btn {
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  color: white;
+  padding: 10px 18px; /* reduced */
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn.refresh {
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #1a1a40;
+  border-radius: 15px;
+  width: 85%; /* reduced */
+  max-width: 650px; /* smaller modal */
+  padding: 15px;
+  overflow-y: auto;
+  max-height: 85%;
+  animation: fadeIn 0.5s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  color: #fff;
+}
+
+.close {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Attendance Cards */
+.attendance-item {
+  background: #2a2a5e;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 10px 0;
+  position: relative;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: slideUp 0.5s ease forwards;
+}
+
+.attendance-item h3 {
+  margin: 0 0 8px;
+  color: white;
+  font-size: 15px;
+}
+
+.subject-code {
+  background: #4a00e0;
+  color: white;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+/* Circular Progress */
+.progress-circle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 60px; /* reduced */
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(#ddd 0%, #ddd 100%);
+  transition: background 1s ease-in-out;
+}
+.progress-circle::before {
+  content: "";
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #2a2a5e;
+  z-index: 1;
+}
+.circle-text {
+  position: relative;
+  z-index: 2;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.attendance-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+      /* Student Info */
+      .student-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .student-info-item {
+        background: #1a1a40;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .student-info-item h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #bbb;
+      }
+
+      .student-info-item p {
+        margin: 5px 0 0;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      /* Overview Card */
+      .card {
+        background: #1a1a40;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      /* Animated Bar Container */
+      .attendance-container {
+        width: 100%;
+        height: 25px;
+        background: #333;
+        border-radius: 50px;
+        overflow: hidden;
+        margin: 20px auto;
+        border: 2px solid #444;
+      }
+
+      /* Filling Bar */
+      .attendance-bar {
+        height: 100%;
+        width: 0; /* Start at 0 for animation */
+        background: linear-gradient(to right, #8e2de2, #4a00e0);
+        border-radius: 50px;
+        transition: width 2s ease-out;
+      }
+
+      /* Buttons */
+      .btn-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .btn {
+        background: linear-gradient(to right, #8e2de2, #4a00e0);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .btn.refresh {
+        background: linear-gradient(to right, #00c6ff, #0072ff);
+      }
+
+      .btn:hover {
+        transform: scale(1.05);
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: #1a1a40;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 700px;
+        padding: 20px;
+        overflow-y: auto;
+        max-height: 90%;
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+      }
+
+      .modal-header h2 {
+        font-size: 22px;
+        color: #fff;
+      }
+
+      .close {
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+      }
+
+      /* Attendance Cards */
+      .attendance-item {
+        background: #2a2a5e;
+        border-radius: 15px;
+        padding: 15px;
+        margin: 15px 0;
+        position: relative;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideUp 0.5s ease forwards;
+      }
+
+      @keyframes slideUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .attendance-item h3 {
+        margin: 0 0 10px;
+        color: white;
+      }
+
+      .subject-code {
+        background: #4a00e0;
+        color: white;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+
+      /* Circular Progress */
+      .progress-circle {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: conic-gradient(#ddd 0%, #ddd 100%);
+        transition: background 1s ease-in-out;
+      }
+
+      .progress-circle::before {
+        content: "";
+        position: absolute;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: #2a2a5e;
+        z-index: 1;
+      }
+
+      .circle-text {
+        position: relative;
+        z-index: 2;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+      }
+
+      .attendance-details {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+     <!-- 🔥 Fixed Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img src="logo.png" alt="SLISS Logo" class="logo" />
+      <span class="brand-text">SLISS</span>
+    </div>
+    <nav class="nav-links">
+      <a href="submit.html" class="active">Home</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+    <main>
+      <div class="card" style="margin-bottom: 30px; text-align: left">
+        <h2 style="text-align: center; margin-bottom: 20px">
+          Student Information
+        </h2>
+        <div class="student-info-grid">
+          <div class="student-info-item">
+            <h3>Name</h3>
+            <p>Mohd Azam Khan</p>
+          </div>
+          <div class="student-info-item">
+            <h3>Branch</h3>
+            <p>CSE</p>
+          </div>
+          <div class="student-info-item">
+            <h3>Semester</h3>
+            <p>3</p>
+          </div>
+          <div class="student-info-item">
+            <h3>Admission No</h3>
+            <p>240290010XXXX</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Attendance Overview</h2>
+        <div class="attendance-container">
+          <div class="attendance-bar" id="attendanceBar"></div>
+        </div>
+        <h2 id="mainPercent" style="margin: 0">81.18%</h2>
+        <p style="color: #bbb" id="suggestion">
+          You need to attend 22 lectures (~3 days) to reach 85% attendance.
+        </p>
+        <div class="btn-container">
+          <button class="btn" onclick="openModal()">
+            📊 View Full Attendance
+          </button>
+          <button class="btn" onclick="openTodayModal()">
+            📅 Today’s Attendance
+          </button>
+          <button class="btn refresh" onclick="refreshPage()">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Full Attendance Modal -->
+    <div class="modal" id="attendanceModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Full Attendance Overview</h2>
+          <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div id="attendanceList"></div>
+      </div>
+    </div>
+
+    <!-- Today’s Attendance Modal (Read-only) -->
+    <div class="modal" id="todayModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Today’s Attendance</h2>
+          <span class="close" onclick="closeTodayModal()">&times;</span>
+        </div>
+        <div id="todaySubjects"></div>
+      </div>
+    </div>
+
+    <script>
+      const subjects = [
+        {
+          name: "Discrete Structures and Theory of Logic",
+          code: "BCS303",
+          faculty: "Ms Preeti Singh",
+          present: 18,
+          absent: 2,
+          todayStatus: "Present",
+        },
+        {
+          name: "Computer Organisation and Architecture",
+          code: "BCS302",
+          faculty: "Laxman Singh",
+          present: 13,
+          absent: 7,
+          todayStatus: "Absent",
+        },
+        {
+          name: "Data Structures Lab",
+          code: "BCS351",
+          faculty: "KBD",
+          present: 11,
+          absent: 2,
+          todayStatus: "Present",
+        },
+        {
+          name: "Web Designing Workshop",
+          code: "BCS353",
+          faculty: "DV",
+          present: 9,
+          absent: 2,
+          todayStatus: "Present",
+        },
+        {
+          name: "Python Programming",
+          code: "BCC302",
+          faculty: "Ankit Kardam",
+          present: 19,
+          absent: 1,
+          todayStatus: "Present",
+        },
+        {
+          name: "Data Structures",
+          code: "BCS301",
+          faculty: "KBD",
+          present: 17,
+          absent: 3,
+          todayStatus: "Absent",
+        },
+        {
+          name: "Mini Project",
+          code: "BCC351",
+          faculty: "Prabhat Raghav",
+          present: 5,
+          absent: 0,
+          todayStatus: "Present",
+        },
+      ];
+
+      const attendanceList = document.getElementById("attendanceList");
+      const attendancePercentage = 81.18;
+
+      // Render Full Attendance List
+      function renderAttendance() {
+        attendanceList.innerHTML = "";
+        subjects.forEach((sub, index) => {
+          const total = sub.present + sub.absent;
+          const percentage = ((sub.present / total) * 100).toFixed(1);
+          const item = document.createElement("div");
+          item.classList.add("attendance-item");
+          item.style.animationDelay = `${index * 0.1}s`;
+          item.innerHTML = `
+            <div class="progress-circle" data-percent="${percentage}">
+              <span class="circle-text">${percentage}%</span>
+            </div>
+            <span class="subject-code">${sub.code}</span>
+            <h3>${sub.name}</h3>
+            <p class="faculty">Faculty: ${sub.faculty}</p>
+            <div class="attendance-details">
+              <div><p style="color: #bbb;">Present</p><p><b>${sub.present}</b></p></div>
+              <div><p style="color: #bbb;">Absent</p><p><b>${sub.absent}</b></p></div>
+              <div><p style="color: #bbb;">Percentage</p><p><b>${percentage}%</b></p></div>
+            </div>
+          `;
+          attendanceList.appendChild(item);
+        });
+      }
+
+      // Animate circular progress
+      function animateCircles() {
+        document.querySelectorAll(".progress-circle").forEach((circle) => {
+          const percent = parseFloat(circle.getAttribute("data-percent"));
+          let start = 0;
+          const interval = setInterval(() => {
+            start += 1;
+            if (start >= percent) {
+              start = percent;
+              clearInterval(interval);
+            }
+            const color = percent >= 75 ? "#4caf50" : "#f44336";
+            circle.style.background = `conic-gradient(${color} ${start}%, #ddd ${start}% 100%)`;
+            circle.querySelector(".circle-text").innerText = `${start.toFixed(
+              1
+            )}%`;
+          }, 15);
+        });
+      }
+
+      // Animate overall attendance bar
+      function animateAttendanceBar() {
+        const bar = document.getElementById("attendanceBar");
+        setTimeout(() => {
+          bar.style.width = attendancePercentage + "%";
+        }, 200);
+      }
+
+      // Open & Close Modals
+      function openModal() {
+        renderAttendance();
+        document.getElementById("attendanceModal").style.display = "flex";
+        animateCircles();
+      }
+      function closeModal() {
+        document.getElementById("attendanceModal").style.display = "none";
+      }
+
+      function openTodayModal() {
+        document.getElementById("todayModal").style.display = "flex";
+        const todaySubjects = document.getElementById("todaySubjects");
+        todaySubjects.innerHTML = "";
+
+        subjects.forEach((sub) => {
+          const color = sub.todayStatus === "Present" ? "#4caf50" : "#f44336";
+          todaySubjects.innerHTML += `
+            <div style="margin-bottom:10px; padding:10px; background:#2a2a5e; border-radius:10px;">
+              <span class="subject-code">${sub.code}</span>
+              <h3 style="margin:5px 0;">${sub.name}</h3>
+              <p style="font-weight:bold; color:${color};">Status: ${sub.todayStatus}</p>
+            </div>
+          `;
+        });
+      }
+
+      function closeTodayModal() {
+        document.getElementById("todayModal").style.display = "none";
+      }
+
+      function refreshPage() {
+        window.location.reload(true);
+      }
+
+      window.onload = () => {
+        animateAttendanceBar();
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Official Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #0b0c2a;
+      color: #e5e7eb;
+    }
+
+    .logo {
+      height: 50px;
+      width: auto;
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    :root {
+      --nav-h: 70px;
+      --accent1: #8b5cf6;
+      --accent2: #d946ef;
+    }
+
+    .navbar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      background: rgba(3, 8, 23, 0.6);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-text {
+      font-weight: 600;
+      color: #fff;
+      margin-left: 6px;
+      letter-spacing: 1px;
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links a {
+      display: inline-block;
+      padding: 8px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s;
+      letter-spacing: 1px;
+    }
+
+    .nav-links a:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.28);
+      filter: brightness(1.05);
+    }
+
+    .nav-links a.active {
+      filter: brightness(1.2);
+      box-shadow: 0 10px 35px rgba(139, 92, 246, 0.45);
+    }
+
+    footer {
+      background-color: #161735;
+    }
+  </style>
+</head>
+
+<body class="text-gray-200">
+  <div class="min-h-screen flex flex-col">
+
+    <!-- 🔹 Header -->
+    <header class="navbar">
+      <div class="nav-left">
+        <img src="logo.png" alt="SLISS Logo" class="logo" />
+        <span class="brand-text">SLISS</span>
+      </div>
+      <nav class="nav-links">
+        <a href="submit.html" class="active">Home</a>
+        <a href="about.html">About</a>
+      </nav>
+    </header>
+
+    <!-- 🔹 Student Profile -->
+    <main class="flex-1 flex items-center justify-center p-6">
+      <div class="bg-[#1f213f] p-8 rounded-xl shadow-lg w-[950px]">
+
+        <!-- 🔹 Personal Info (Top Section) -->
+        <div class="flex items-center justify-between border-b border-gray-600 pb-6 mb-6">
+          <!-- Left Info -->
+          <div class="space-y-2">
+            <h2 class="text-2xl font-bold text-purple-400">Student Profile</h2>
+            <p><strong>Name:</strong> <span id="name">-</span></p>
+            <p><strong>DOB:</strong> <span id="dob">-</span></p>
+            <p><strong>Gender:</strong> <span id="gender">-</span></p>
+            <p><strong>Contact:</strong> <span id="contact">-</span></p>
+            <p><strong>Category:</strong> <span id="category">-</span></p>
+            <p><strong>Address:</strong> <span id="address">-</span></p>
+            <p><strong>Parent's Name:</strong> <span id="parent_name">-</span></p>
+            <p><strong>Parent's Contact:</strong> <span id="parent_contact">-</span></p>
+          </div>
+
+          <!-- Right Photo -->
+          <div class="flex flex-col items-center">
+            <img id="profile_photo" src="placeholder.png" alt="Student Photo" 
+                 onerror="this.src='placeholder.png';"
+                 class="w-44 h-44 rounded-full object-cover shadow-lg border-4 border-purple-500" />
+            <p class="mt-3 text-sm text-gray-400">Student Photo</p>
+          </div>
+        </div>
+
+        <!-- 🔹 Academic / Official Info (Bottom Section) -->
+        <div>
+          <h2 class="text-xl font-semibold mb-4 text-purple-400">Academic & Official Details</h2>
+          <div class="grid grid-cols-2 gap-6">
+            <p><strong>Admission No:</strong> <span id="admission_no">-</span></p>
+            <p><strong>University Roll No:</strong> <span id="univ_roll">-</span></p>
+            <p><strong>Admission Date:</strong> <span id="admission_date">-</span></p>
+            <p><strong>Status:</strong> <span id="status">Active</span></p>
+            <p><strong>Session:</strong> <span id="session">-</span></p>
+            <p><strong>Course:</strong> <span id="course">-</span></p>
+            <p><strong>Section:</strong> <span id="section">-</span></p>
+            <p><strong>Group:</strong> <span id="group">-</span></p>
+            <p><strong>Admission Semester:</strong> <span id="admission_sem">-</span></p>
+            <p><strong>Current Semester:</strong> <span id="current_sem">-</span></p>
+            <p><strong>Quota:</strong> <span id="quota">-</span></p>
+            <p><strong>Hostel:</strong> <span id="hostel">No</span></p>
+            <p><strong>Mess:</strong> <span id="mess">No</span></p>
+            <p><strong>Transport:</strong> <span id="transport">No</span></p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const userid = localStorage.getItem("userid");
+    if (!userid) {
+      alert("User not logged in. Redirecting to login...");
+      window.location.href = "index.html";
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    async function fetchStudentData() {
+      try {
+        const res = await fetch(`/api/students/${userid}`);
+        if (!res.ok) throw new Error("Failed to fetch student data");
+
+        const student = await res.json();
+
+        // Personal info
+        document.getElementById("name").textContent = student.name || "-";
+        document.getElementById("dob").textContent = formatDate(student.dob);
+        document.getElementById("gender").textContent = student.gender || "-";
+        document.getElementById("contact").textContent = student.contact || "-";
+        document.getElementById("category").textContent = student.category || "-";
+        document.getElementById("address").textContent = student.address || "-";
+        document.getElementById("parent_name").textContent = student.parent_name || "-";
+        document.getElementById("parent_contact").textContent = student.parent_contact || "-";
+        document.getElementById("profile_photo").src = student.profile_photo_url || "placeholder.png";
+
+        // Academic / official info
+        document.getElementById("admission_no").textContent = student.admission_no || "-";
+        document.getElementById("univ_roll").textContent = student.univ_roll || "-";
+        document.getElementById("admission_date").textContent = formatDate(student.admission_date);
+        document.getElementById("status").textContent = student.status || "Active";
+        document.getElementById("session").textContent = student.session || "-";
+        document.getElementById("course").textContent = student.course || "-";
+        document.getElementById("section").textContent = student.section || "-";
+        document.getElementById("group").textContent = student.group || "-";
+        document.getElementById("admission_sem").textContent = student.admission_sem || "-";
+        document.getElementById("current_sem").textContent = student.current_sem || "-";
+        document.getElementById("quota").textContent = student.quota || "-";
+        document.getElementById("hostel").textContent = student.hostel ? "Yes" : "No";
+        document.getElementById("mess").textContent = student.mess ? "Yes" : "No";
+        document.getElementById("transport").textContent = student.transport ? "Yes" : "No";
+
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load student details");
+      }
+    }
+
+    fetchStudentData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Fees Management Portal</title>
+    <style>
+        body {
+            background-color: #0e0e1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+
+        .card {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #141428;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #c084fc;
+            text-align: center;
+        }
+
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .student-card {
+            background: #1e1e2e;
+            padding: 20px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr 1.5fr;
+            align-items: center;
+            gap: 20px;
+            border-left: 5px solid transparent;
+        }
+
+        .student-card.paid {
+            border-left-color: #4CAF50;
+        }
+
+        .student-card.not-paid {
+            border-left-color: #f44336;
+        }
+
+        .student-info {
+            font-size: 1.1em;
+        }
+
+        .student-info h3 {
+            margin: 0;
+            color: #bb86fc;
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-toggle label {
+            font-weight: bold;
+        }
+
+        .paid-checkbox {
+            transform: scale(1.2);
+            accent-color: #4CAF50;
+        }
+
+        .payment-medium select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #2c2c2c;
+            color: white;
+        }
+
+        .total-amount {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .save-btn {
+            background: linear-gradient(90deg, #8b5cf6, #d946ef);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Teacher Fees Management</h1>
+
+    <div class="student-list" id="studentList">
+        </div>
+</div>
+
+<script>
+    // Simulated student data (replace with data from your backend)
+    const initialStudentData = [
+        { id: 1, name: "Kritika Malik", totalFees: 167000, paid: true, medium: "Online Payment" },
+        { id: 2, name: "Khusagrah Tomar", totalFees: 167000, paid: false, medium: "Cash" },
+        { id: 3, name: "Sakshi Malik", totalFees: 167000, paid: true, medium: "Bank Transfer" },
+        { id: 4, name: "Azam Khan", totalFees: 167000, paid: false, medium: "Cash" },
+        { id: 5, name: "Srishti Singh", totalFees: 167000, paid: true, medium: "Online Payment" },
+        { id: 6, name: "Rakshita Tiwari", totalFees: 167000, paid: false, medium: "Bank Transfer" },
+    ];
+
+    const studentData = JSON.parse(localStorage.getItem('studentFees')) || initialStudentData;
+
+    const studentListContainer = document.getElementById('studentList');
+
+    // Function to render the student list
+    const renderStudents = () => {
+        studentListContainer.innerHTML = '';
+        studentData.forEach(student => {
+            const studentCard = document.createElement('div');
+            studentCard.className = `student-card ${student.paid ? 'paid' : 'not-paid'}`;
+            studentCard.dataset.id = student.id;
+
+            studentCard.innerHTML = `
+                <div class="student-info">
+                    <h3>${student.name}</h3>
+                </div>
+                <div class="status-toggle">
+                    <label>Paid</label>
+                    <input type="checkbox" class="paid-checkbox" ${student.paid ? 'checked' : ''}>
+                </div>
+                <div class="payment-medium">
+                    <select class="medium-select">
+                        <option value="" disabled>Select Medium</option>
+                        <option value="Online Payment" ${student.medium === "Online Payment" ? 'selected' : ''}>Online Payment</option>
+                        <option value="Cash" ${student.medium === "Cash" ? 'selected' : ''}>Cash</option>
+                        <option value="Bank Transfer" ${student.medium === "Bank Transfer" ? 'selected' : ''}>Bank Transfer</option>
+                        <option value="Cheque" ${student.medium === "Cheque" ? 'selected' : ''}>Cheque</option>
+                    </select>
+                </div>
+                <div class="total-amount">
+                    <span>₹${student.totalFees.toLocaleString()}</span>
+                    <button class="save-btn">Save</button>
+                </div>
+            `;
+            studentListContainer.appendChild(studentCard);
+        });
+    };
+
+    // Event listener for changes
+    studentListContainer.addEventListener('change', (event) => {
+        const card = event.target.closest('.student-card');
+        const studentId = parseInt(card.dataset.id);
+        const student = studentData.find(s => s.id === studentId);
+
+        if (event.target.classList.contains('paid-checkbox')) {
+            student.paid = event.target.checked;
+            card.classList.toggle('paid', student.paid);
+            card.classList.toggle('not-paid', !student.paid);
+        } else if (event.target.classList.contains('medium-select')) {
+            student.medium = event.target.value;
+        }
+    });
+
+    // Event listener for save button
+    studentListContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('save-btn')) {
+            const card = event.target.closest('.student-card');
+            const studentId = parseInt(card.dataset.id);
+            const student = studentData.find(s => s.id === studentId);
+
+            // Save the data to localStorage
+            localStorage.setItem('studentFees', JSON.stringify(studentData));
+            alert(`Saved changes for ${student.name}`);
+        }
+    });
+
+    // Initial render
+    renderStudents();
+</script>
+
+</body>
+</html>

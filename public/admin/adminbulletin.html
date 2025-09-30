@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Bulletin Board Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .notice-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .category-badge {
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .floating-action {
+      position: fixed; bottom: 2rem; right: 2rem;
+      z-index: 50;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      box-shadow: 0 10px 25px -5px rgba(139,92,246,0.4);
+    }
+    .modal-backdrop {
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-pulse-custom {
+      animation: pulseCustom 2s infinite;
+    }
+    @keyframes pulseCustom {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white">
+  <!-- Header -->
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20"></div>
+    <div class="relative container mx-auto px-6 py-12 text-center">
+      <h1 class="text-6xl md:text-7xl font-bold gradient-text mb-4 animate-fade-in">
+        Bulletin Board
+      </h1>
+      <p class="text-xl text-purple-200 mb-8 animate-fade-in" style="animation-delay:0.2s">
+        Important announcements, events, and updates for students.
+      </p>
+
+      <!-- Clear Notices button -->
+      <div class="flex justify-center mb-8">
+        <button id="clear-notices-btn" class="px-8 py-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-300">
+          Clear All Notices
+        </button>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="flex justify-center mb-6">
+        <select id="category-filter" class="bg-white/10 backdrop-filter backdrop-blur-lg border border-white/20 rounded-xl px-6 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+          <option value="all" class="bg-gray-800">All Categories</option>
+          <option value="announcement" class="bg-gray-800">Announcements</option>
+          <option value="exam" class="bg-gray-800">Exams</option>
+          <option value="meeting" class="bg-gray-800">Meetings</option>
+          <option value="events" class="bg-gray-800">Events</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-8">
+    <div id="notices-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in"></div>
+  </main>
+
+  <!-- Floating Add Button -->
+  <button id="add-notice-btn" class="floating-action w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl hover:scale-110 transition-transform duration-300">
+    +
+  </button>
+
+  <!-- Modal for Adding/Editing Notice -->
+  <div id="notice-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50">
+    <div class="bg-white/10 backdrop-filter backdrop-blur-xl rounded-3xl p-8 max-w-md w-full mx-4 border border-white/20">
+      <h2 id="modal-title" class="text-3xl font-bold gradient-text mb-6">Add New Notice</h2>
+      <form id="notice-form" class="space-y-6">
+        <input type="hidden" id="notice-id" value="">
+        <div>
+          <label class="block text-purple-200 font-semibold mb-2">Title</label>
+          <input type="text" id="notice-title" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter notice title">
+        </div>
+        <div>
+          <label class="block text-purple-200 font-semibold mb-2">Category</label>
+          <select id="notice-category" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <option value="" class="bg-gray-800">Select Category</option>
+            <option value="announcement" class="bg-gray-800">Announcement</option>
+            <option value="exam" class="bg-gray-800">Exam</option>
+            <option value="meeting" class="bg-gray-800">Meeting</option>
+            <option value="events" class="bg-gray-800">Events</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-purple-200 font-semibold mb-2">Date</label>
+          <input type="date" id="notice-date" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+        </div>
+        <div>
+          <label class="block text-purple-200 font-semibold mb-2">Content</label>
+          <textarea id="notice-content" required rows="4" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" placeholder="Enter notice content"></textarea>
+        </div>
+        <div class="flex gap-4">
+          <button type="submit" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl py-3 font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+            Save Notice
+          </button>
+          <button type="button" id="cancel-btn" class="flex-1 bg-white/10 border border-white/20 rounded-xl py-3 font-semibold hover:bg-white/20 transition-all duration-300">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let notices = [];
+    let currentFilter = 'all';
+
+    const API_URL = "/api/bulletin";
+
+    const clearNoticesBtn = document.getElementById('clear-notices-btn');
+    const categoryFilter = document.getElementById('category-filter');
+    const noticesContainer = document.getElementById('notices-container');
+    const addNoticeBtn = document.getElementById('add-notice-btn');
+    const noticeModal = document.getElementById('notice-modal');
+    const noticeForm = document.getElementById('notice-form');
+    const modalTitle = document.getElementById('modal-title');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    const categoryStyles = {
+      announcement: { bg: 'from-blue-500 to-cyan-400', icon: '📢', label: 'Announcement' },
+      exam: { bg: 'from-red-500 to-pink-500', icon: '🔒', label: 'Exam' },
+      meeting: { bg: 'from-purple-500 to-indigo-500', icon: '💜', label: 'Meeting' },
+      events: { bg: 'from-green-500 to-emerald-400', icon: '💚', label: 'Events' }
+    };
+
+    clearNoticesBtn.addEventListener('click', clearAllNotices);
+    categoryFilter.addEventListener('change', handleCategoryFilter);
+    addNoticeBtn.addEventListener('click', openAddModal);
+    cancelBtn.addEventListener('click', closeModal);
+    noticeForm.addEventListener('submit', handleFormSubmit);
+    noticeModal.addEventListener('click', (e) => { if (e.target === noticeModal) closeModal(); });
+
+    function renderNotices() {
+      const filteredNotices = currentFilter === 'all' ? notices : notices.filter(n => n.category === currentFilter);
+      if (filteredNotices.length === 0) {
+        noticesContainer.innerHTML = `
+          <div class="col-span-full text-center py-20">
+            <div class="text-6xl mb-4 animate-pulse-custom">📋</div>
+            <h3 class="text-2xl font-semibold text-purple-200 mb-2">No updates available at the moment.</h3>
+            <p class="text-purple-300">Please check back later for new announcements.</p>
+          </div>`;
+        return;
+      }
+      noticesContainer.innerHTML = filteredNotices.map(notice => {
+        const style = categoryStyles[notice.category];
+        const formattedDate = new Date(notice.date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+        return `
+          <div class="notice-card rounded-3xl p-6 card-hover animate-fade-in relative group">
+            <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button onclick="editNotice(${notice.id})" class="w-8 h-8 bg-blue-500/80 hover:bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">✏️</button>
+              <button onclick="deleteNotice(${notice.id})" class="w-8 h-8 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center text-white text-sm">🗑️</button>
+            </div>
+            <span class="category-badge bg-gradient-to-r ${style.bg} px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 mb-4">
+              <span>${style.icon}</span> ${style.label}
+            </span>
+            <h3 class="text-2xl font-bold text-white mb-2">${notice.title}</h3>
+            <p class="text-purple-200 text-sm mb-4">${formattedDate}</p>
+            <p class="text-purple-100 leading-relaxed">${notice.content}</p>
+          </div>`;
+      }).join('');
+    }
+
+    function handleCategoryFilter() {
+      currentFilter = categoryFilter.value;
+      renderNotices();
+    }
+
+    async function clearAllNotices() {
+      if (confirm('Clear all notices?')) {
+        await fetch(API_URL, { method: "DELETE" });
+        notices = [];
+        renderNotices();
+      }
+    }
+
+    function openAddModal() {
+      modalTitle.textContent='Add New Notice';
+      document.getElementById('notice-id').value='';
+      noticeForm.reset();
+      document.getElementById('notice-date').value=new Date().toISOString().split('T')[0];
+      noticeModal.classList.replace('hidden','flex');
+    }
+
+    function closeModal() {
+      noticeModal.classList.replace('flex','hidden');
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const formData = {
+        title: document.getElementById('notice-title').value,
+        category: document.getElementById('notice-category').value,
+        date: document.getElementById('notice-date').value,
+        content: document.getElementById('notice-content').value
+      };
+
+      const idField = document.getElementById('notice-id').value;
+
+      if (idField) {
+        const res = await fetch(`${API_URL}/${idField}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+        const updated = await res.json();
+        const idx = notices.findIndex(n => n.id == updated.id);
+        if (idx !== -1) notices[idx] = updated;
+      } else {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+        const newNotice = await res.json();
+        notices.unshift(newNotice);
+      }
+
+      closeModal();
+      renderNotices();
+    }
+
+    window.editNotice = (id) => {
+      const n = notices.find(x=>x.id===id);
+      if (!n) return;
+      modalTitle.textContent='Edit Notice';
+      document.getElementById('notice-id').value=n.id;
+      document.getElementById('notice-title').value=n.title;
+      document.getElementById('notice-category').value=n.category;
+      document.getElementById('notice-date').value=n.date.split('T')[0];
+      document.getElementById('notice-content').value=n.content;
+      noticeModal.classList.replace('hidden','flex');
+    };
+
+    window.deleteNotice = async (id) => {
+      if (confirm('Delete this notice?')) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        notices = notices.filter(n=>n.id!==id);
+        renderNotices();
+      }
+    };
+
+    async function loadNotices() {
+      const res = await fetch(API_URL);
+      notices = await res.json();
+      renderNotices();
+    }
+
+    try {
+  const res = await fetch(API_URL);
+  if (!res.ok) throw new Error("Failed to fetch notices");
+  notices = await res.json();
+} catch (err) {
+  console.error(err);
+  notices = [];
+}
+renderNotices();
+
+
+    loadNotices();
+  </script>
+</body>
+</html>

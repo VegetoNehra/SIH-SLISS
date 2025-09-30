@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Upload</title>
+    <style>
+        body { font-family: sans-serif; background: #0c0b1d; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #1e1d32; padding: 30px 50px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); width: 100%; max-width: 600px; text-align: center; }
+        h1 { color: #8a2be2; margin-bottom: 20px; }
+        form { display: flex; flex-direction: column; gap: 15px; }
+        label { text-align: left; font-weight: bold; }
+        input[type="text"], select, input[type="file"] { padding: 12px; border-radius: 8px; border: none; background: #2f2e4a; color: #fff; width: 100%; box-sizing: border-box; }
+        input[type="file"]::-webkit-file-upload-button { background: #4a4968; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        button { padding: 15px 25px; border: none; border-radius: 8px; background: #8a2be2; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s ease; font-size: 16px; }
+        button:hover { background: #a252f5; }
+        .message { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teacher Upload Portal 🧑‍🏫</h1>
+        <form id="upload-form">
+            <label for="subject">Subject:</label>
+            <select id="subject" name="subject" required>
+                <option value="">--Select Subject--</option>
+                <option value="Sensor">Sensor</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+            </select>
+
+            <label for="unit">Unit:</label>
+            <select id="unit" name="unit" required>
+                <option value="">--Select Unit--</option>
+                <option value="1">Unit 1</option>
+                <option value="2">Unit 2</option>
+                <option value="3">Unit 3</option>
+                <option value="4">Unit 4</option>
+                <option value="5">Unit 5</option>
+            </select>
+
+            <label for="file-type">File Type:</label>
+            <select id="file-type" name="file-type" required>
+                <option value="Notes">Notes</option>
+                <option value="PYQ">PYQ</option>
+            </select>
+            
+            <label for="file">Choose File:</label>
+            <input type="file" id="file" name="file" required>
+
+            <button type="submit">Upload File</button>
+        </form>
+        <div id="status-message" class="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevents the form from submitting and refreshing the page
+            
+            const subject = document.getElementById('subject').value;
+            const unit = document.getElementById('unit').value;
+            const fileType = document.getElementById('file-type').value;
+            const fileName = document.getElementById('file').files[0].name;
+
+            const messageDiv = document.getElementById('status-message');
+            messageDiv.style.color = 'lime';
+            messageDiv.textContent = `File "${fileName}" for ${subject}, Unit ${unit} (${fileType}) has been submitted. (Note: This is a frontend-only demo and the file is not actually saved.)`;
+
+            // Reset the form after a short delay
+            setTimeout(() => {
+                event.target.reset();
+                messageDiv.textContent = '';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Feedback Dashboard</title>
+  <style>
+    :root {
+      --primary-color: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --bg-dark: #0e0e1a;
+      --card-bg: #1a1a2e;
+      --text-light: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #f59e0b;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: "Inter", Arial, sans-serif;
+      padding: 20px;
+    }
+    .container { max-width: 1000px; margin: auto; }
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .card-header {
+      color: var(--primary-color);
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      border-bottom: 2px solid var(--primary-dark);
+      display: inline-block;
+      padding-bottom: 4px;
+    }
+    .teacher-select {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    label { color: var(--text-muted); }
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--primary-dark);
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      width: 250px;
+      font-size: 1em;
+      transition: border 0.3s;
+    }
+    select:focus { outline: none; border-color: var(--primary-color); }
+    .average-ratings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: space-between;
+    }
+    .rating-item {
+      flex: 1;
+      min-width: 220px;
+      background-color: #111827;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #2d2d44;
+      transition: transform 0.2s;
+    }
+    .rating-item:hover { transform: translateY(-3px); }
+    .rating-item h3 {
+      margin-top: 0;
+      margin-bottom: 5px;
+      font-size: 1.1em;
+      color: var(--text-muted);
+    }
+    .rating-value {
+      font-size: 2em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .comments-section { margin-top: 30px; }
+    .comment-box {
+      background-color: #111827;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border-left: 5px solid var(--primary-color);
+    }
+    .comment-text { font-style: italic; color: var(--text-light); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">Teacher Feedback Dashboard</div>
+    <p style="text-align: center; color: var(--text-muted);">View Your Ratings & Comments</p>
+  </div>
+
+  <div class="teacher-select">
+    <label for="teacherDropdown">Select Teacher:</label>
+    <select id="teacherDropdown">
+      <option value="" disabled selected>Select a teacher</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Average Ratings</h2>
+    <div class="average-ratings" id="averageRatingsContainer">
+      <p style="color: var(--text-muted);">Select a teacher to view ratings.</p>
+    </div>
+  </div>
+
+  <div class="card comments-section">
+    <h2>Student Comments</h2>
+    <div id="commentsContainer">
+      <p style="color: var(--text-muted);">Select a teacher to view comments.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = "/api/feedback"; // ✅ backend route
+
+  let feedbackData = [];
+
+  // Fetch feedback data from backend
+  async function loadFeedback() {
+    try {
+      const res = await fetch(API_URL);
+      feedbackData = await res.json();
+      populateTeachers(feedbackData);
+    } catch (err) {
+      console.error("Error fetching feedback:", err);
+    }
+  }
+
+  function populateTeachers(data) {
+    const teacherDropdown = document.getElementById("teacherDropdown");
+    teacherDropdown.innerHTML = '<option value="" disabled selected>Select a teacher</option>';
+
+    const teachers = [...new Set(data.map(item => item.teacher))];
+    teachers.forEach(teacher => {
+      const option = document.createElement("option");
+      option.value = teacher;
+      option.textContent = teacher;
+      teacherDropdown.appendChild(option);
+    });
+
+    teacherDropdown.addEventListener("change", (event) => {
+      const selectedTeacher = event.target.value;
+      const averages = getAverageRatings(feedbackData, selectedTeacher);
+      displayAverageRatings(averages);
+      displayComments(feedbackData, selectedTeacher);
+    });
+  }
+
+  function getAverageRatings(data, teacher) {
+    const teacherFeedback = data.filter(item => item.teacher === teacher);
+    if (teacherFeedback.length === 0) return null;
+
+    const totals = {};
+    const categories = [
+      "knowledge",
+      "behaviour",
+      "communication_skill",
+      "nature",
+      "punctuality",
+      "helpfulness",
+      "teaching_methods"
+    ];
+
+    categories.forEach(cat => totals[cat] = 0);
+
+    teacherFeedback.forEach(item => {
+      categories.forEach(cat => {
+        totals[cat] += item[cat];
+      });
+    });
+
+    const averages = {};
+    categories.forEach(cat => {
+      averages[cat] = (totals[cat] / teacherFeedback.length).toFixed(1);
+    });
+
+    return averages;
+  }
+
+  function displayAverageRatings(averages) {
+    const container = document.getElementById("averageRatingsContainer");
+    container.innerHTML = "";
+
+    if (!averages) {
+      container.innerHTML = "<p style='color: var(--text-muted);'>No feedback available yet for this teacher.</p>";
+      return;
+    }
+
+    for (const [key, value] of Object.entries(averages)) {
+      const ratingItem = document.createElement("div");
+      ratingItem.className = "rating-item";
+      const categoryName = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      ratingItem.innerHTML = `<h3>${categoryName}</h3><span class="rating-value">${value}</span> / 5`;
+      container.appendChild(ratingItem);
+    }
+  }
+
+  function displayComments(data, teacher) {
+    const container = document.getElementById("commentsContainer");
+    const teacherComments = data.filter(item => item.teacher === teacher && item.comments);
+    container.innerHTML = "";
+
+    if (teacherComments.length === 0) {
+      container.innerHTML = "<p style='color: var(--text-muted);'>No comments available yet for this teacher.</p>";
+      return;
+    }
+
+    teacherComments.forEach(item => {
+      const commentBox = document.createElement("div");
+      commentBox.className = "comment-box";
+      commentBox.innerHTML = `<p class="comment-text">"${item.comments}"</p>`;
+      container.appendChild(commentBox);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadFeedback);
+</script>
+
+</body>
+</html>

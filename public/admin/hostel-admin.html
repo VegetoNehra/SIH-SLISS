@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hostel Admin Management</title>
+<style>
+  body {
+    background-color: #0e0e1a;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  h1 { text-align:center; color: #c084fc; }
+  .hostel-tabs { display: flex; justify-content:center; margin-bottom: 20px; }
+  .tab-button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background: #1e1e2e;
+    border:none;
+    border-radius: 8px;
+    cursor:pointer;
+    color:#bbb;
+    font-weight:bold;
+    transition: 0.3s;
+  }
+  .tab-button.active { background: #c084fc; color:white; }
+
+  .rooms-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap:20px;
+  }
+
+  .room-card {
+    background:#1e1e2e;
+    padding:15px;
+    border-radius:10px;
+    border:2px solid transparent;
+    position:relative;
+    transition: all 0.3s ease;
+  }
+
+  .room-card.occupied { border-color:#ff3333; }
+  .room-card.vacant { border-color:#33cc33; }
+
+  .room-card input, .room-card select {
+    width: 100%;
+    padding:5px;
+    margin-bottom:5px;
+    border-radius:5px;
+    border:none;
+    background:#2c2c2c;
+    color:white;
+  }
+
+  .room-card button {
+    width:100%;
+    padding:8px;
+    border:none;
+    border-radius:5px;
+    background:#c084fc;
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+    transition:0.3s;
+  }
+  .room-card button:hover { background:#a967f1; }
+</style>
+</head>
+<body>
+
+<h1>Hostel Admin Management</h1>
+
+<div class="hostel-tabs">
+  <button class="tab-button active" data-hostel="boys">Boys Hostel</button>
+  <button class="tab-button" data-hostel="girls">Girls Hostel</button>
+</div>
+
+<div class="rooms-grid" id="roomsGrid"></div>
+
+<script>
+const baseURL = "/api/rooms";
+let currentHostel = "boys";
+const roomsGrid = document.getElementById("roomsGrid");
+const tabButtons = document.querySelectorAll(".tab-button");
+
+// Fetch rooms from server
+async function fetchRooms(hostel) {
+  const res = await fetch(`${baseURL}/${hostel}`);
+  const data = await res.json();
+  renderRooms(data);
+}
+
+// Render rooms dynamically
+function renderRooms(rooms) {
+  roomsGrid.innerHTML = "";
+  rooms.forEach(room => {
+    const card = document.createElement("div");
+    card.className = `room-card ${room.available ? "vacant":"occupied"}`;
+    card.innerHTML = `
+      <h3>${room.room_id}</h3>
+      <label>Type:</label>
+      <select class="type-select">
+        <option value="Single AC" ${room.type=="Single AC"?"selected":""}>Single AC</option>
+        <option value="Single Non-AC" ${room.type=="Single Non-AC"?"selected":""}>Single Non-AC</option>
+        <option value="Double AC" ${room.type=="Double AC"?"selected":""}>Double AC</option>
+        <option value="Double Non-AC" ${room.type=="Double Non-AC"?"selected":""}>Double Non-AC</option>
+        <option value="Triple AC" ${room.type=="Triple AC"?"selected":""}>Triple AC</option>
+        <option value="Triple Non-AC" ${room.type=="Triple Non-AC"?"selected":""}>Triple Non-AC</option>
+      </select>
+      <label>Seats:</label>
+      <input type="number" class="seats-input" value="${room.seats}" min="1">
+      <label>Available:</label>
+      <select class="avail-select">
+        <option value="true" ${room.available?"selected":""}>Yes</option>
+        <option value="false" ${!room.available?"selected":""}>No</option>
+      </select>
+      <button class="update-btn">Update</button>
+    `;
+    // Handle update button click
+    card.querySelector(".update-btn").addEventListener("click", async () => {
+      const type = card.querySelector(".type-select").value;
+      const seats = parseInt(card.querySelector(".seats-input").value);
+      const available = card.querySelector(".avail-select").value === "true";
+      const res = await fetch(`${baseURL}/${room.id}`, {
+        method:"PUT",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ type, seats, available })
+      });
+      const result = await res.json();
+      alert(result.message);
+      fetchRooms(currentHostel); // refresh
+    });
+    roomsGrid.appendChild(card);
+  });
+}
+
+// Tab switching
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    tabButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentHostel = btn.dataset.hostel;
+    fetchRooms(currentHostel);
+  });
+});
+
+// Initial fetch
+fetchRooms(currentHostel);
+</script>
+
+</body>
+</html>
