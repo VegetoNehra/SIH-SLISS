@@ -283,17 +283,6 @@
       renderNotices();
     }
 
-    try {
-  const res = await fetch(API_URL);
-  if (!res.ok) throw new Error("Failed to fetch notices");
-  notices = await res.json();
-} catch (err) {
-  console.error(err);
-  notices = [];
-}
-renderNotices();
-
-
     loadNotices();
   </script>
 </body>
