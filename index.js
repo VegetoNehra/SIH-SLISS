@@ -271,6 +271,9 @@ app.post("/api/rooms/add", async (req, res) => {
   res.json({ message: "Room added successfully" });
 });
 
+// ============================
+// LOGIN ROUTE
+// ============================
 app.post("/api/login", async (req, res) => {
   const { userid, password } = req.body;
 
@@ -320,6 +323,38 @@ app.post("/api/login", async (req, res) => {
     }
   } catch (err) {
     console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+// ============================
+// ADMIN LOGIN ROUTE
+// ============================
+app.post("/api/admin/login", async (req, res) => {
+  const { userid, password } = req.body;
+
+  if (!userid || !password) {
+    return res.status(400).json({ message: "UserID and password are required" });
+  }
+
+  try {
+    // Check admin_user table for matching credentials
+    const adminResult = await pool.query(
+      "SELECT id, userid, created_at FROM admin_user WHERE userid=$1 AND password=$2",
+      [userid, password]
+    );
+
+    if (adminResult.rows.length === 0) {
+      return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+
+    // ✅ Login successful
+    res.json({
+      success: true,
+      message: "Admin login successful",
+      admin: adminResult.rows[0],
+    });
+  } catch (err) {
+    console.error("Admin login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -611,6 +646,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+
 
 
 
