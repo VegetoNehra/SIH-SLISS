@@ -562,12 +562,15 @@ app.delete("/api/bulletin", async (req, res) => {
 // ============================
 // Serve frontend
 // ============================
+// Serve frontend - default to student portal
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "student", "index.html"));
 });
+
 
 // ============================
 // Start server
 // ============================
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
