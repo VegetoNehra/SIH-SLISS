@@ -504,7 +504,9 @@ app.get("/api/students/:userid", async (req, res) => {
 
 
 
-// ============================
+
+ 
+  // ============================
 // Bulletin (lowercase columns)
 // ============================
 
@@ -596,6 +598,7 @@ app.delete("/api/bulletin", async (req, res) => {
   }
 });
 
+
 // ============================
 // Serve frontend
 // ============================
@@ -611,4 +614,5 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+
 
